@@ -478,8 +478,6 @@ void ExportFont(UndertaleFont font)
         )
     );
 
-    File.WriteAllText(projFolder + "/fonts/" + font.Name.Content + ".font.gmx", gmx.ToString());
-    
     var glyphsNode = gmx.Element("font").Element("glyphs");
     foreach (var i in font.Glyphs)
     {
@@ -494,6 +492,8 @@ void ExportFont(UndertaleFont font)
         glyphsNode.Add(glyphNode);
     }
 
+    File.WriteAllText(projFolder + "/fonts/" + font.Name.Content + ".font.gmx", gmx.ToString());
+
     // Save font textures
     worker.ExportAsPNG(font.Texture, projFolder + "/fonts/" + font.Name.Content + ".png");
 }
@@ -502,11 +502,68 @@ void ExportFont(UndertaleFont font)
 void ExportProjectFile()
 {
     // Write all resource indexes to project.gmx
-    var xmlWriter = XmlWriter.Create(projFolder + "Export_Project.project.gmx");
-    xmlWriter.WriteStartDocument();
+    var gmx = new XDocument(
+        new XComment(gmxDeclaration),
+        new XElement("assets")
+    );
 
-    xmlWriter.WriteStartElement("assets");
+    // Write sound indexes
+    var soundsNode = new XElement("sounds",
+        new XAttribute("name", "sound")
+    );
+    foreach (var i in Data.Sounds)
+    {
+        var soundNode = new XElement("sound", "sound\\" + i.Name.Content);
+        soundsNode.Add(soundNode);
+    }
+    gmx.Element("assets").Add(soundsNode);
 
+    // Write sprite indexes
+    var spritesNode = new XElement("sprites",
+        new XAttribute("name", "sprites")
+    );
+    foreach (var i in Data.Sprites)
+    {
+        var spriteNode = new XElement("sprite", "sprites\\" + i.Name.Content);
+        spritesNode.Add(spriteNode);
+    }
+    gmx.Element("assets").Add(spritesNode);
+
+    // Write background indexes
+    var backgroundsNode = new XElement("backgrounds",
+        new XAttribute("name", "background")
+    );
+    foreach (var i in Data.Backgrounds)
+    {
+        var backgroundNode = new XElement("background", "background\\" + i.Name.Content);
+        backgroundsNode.Add(backgroundNode);
+    }
+    gmx.Element("assets").Add(backgroundsNode);
+
+    // Write script indexes
+    var scriptsNode = new XElement("scripts",
+        new XAttribute("name", "scripts")
+    );
+    foreach (var i in Data.Scripts)
+    {
+        var scriptNode = new XElement("script", "scripts\\" + i.Name.Content + ".gml");
+        scriptsNode.Add(scriptNode);
+    }
+    gmx.Element("assets").Add(scriptsNode);
+
+    // Write font indexes
+    var scriptsNode = new XElement("scripts",
+        new XAttribute("name", "scripts")
+    );
+    foreach (var i in Data.Scripts)
+    {
+        var scriptNode = new XElement("script", "scripts\\" + i.Name.Content + ".gml");
+        scriptsNode.Add(scriptNode);
+    }
+    gmx.Element("assets").Add(scriptsNode);
+
+    File.WriteAllText(projFolder + "Export_Project.project.gmx", gmx.ToString());
+///////////////////////////////////////////
     xmlWriter.WriteStartElement("sounds");
     xmlWriter.WriteAttributeString("name", "sound");
     foreach (var i in Data.Sounds)
@@ -582,3 +639,15 @@ void ExportProjectFile()
     xmlWriter.Close();
 }
 
+void WriteIndexes(string elementName, string attributeName, List dataList, string oneName, string fileName, XElement rootNode)
+{
+    var datasNode = new XElement(
+        new XAttribute(elementName, attributeName)
+    );
+    foreach (var i in dataList)
+    {
+        var dataNode = new XElement(oneName, fileName);
+        datasNode.Add(dataNode);
+    }
+    rootNode.Add(datasNode);
+}
