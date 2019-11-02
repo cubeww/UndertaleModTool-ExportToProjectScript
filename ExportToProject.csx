@@ -502,12 +502,12 @@ void ExportFont(UndertaleFont font)
 // --------------- Generate project file ---------------
 void ExportProjectFile()
 {
-    // Write all resource indexes to project.gmx
     var gmx = new XDocument(
         new XComment(gmxDeclaration),
         new XElement("assets")
     );
 
+    // Write all resource indexes to project.gmx
     WriteIndexes<UndertaleSound>(gmx.Element("assets"), "sounds", "sound", Data.Sounds, "sound", "sound\\");
     WriteIndexes<UndertaleSprite>(gmx.Element("assets"), "sprites", "sprites", Data.Sprites, "sprite", "sprites\\");
     WriteIndexes<UndertaleBackground>(gmx.Element("assets"), "backgrounds", "background", Data.Backgrounds, "background", "background\\");
@@ -521,13 +521,13 @@ void ExportProjectFile()
 
 void WriteIndexes<T>(XElement rootNode, string elementName, string attributeName, IList<T> dataList, string oneName, string resourcePath, string fileExtension = "")
 {
-    var datasNode = new XElement(elementName,
+    var resourcesNode = new XElement(elementName,
         new XAttribute("name", attributeName)
     );
     foreach (UndertaleNamedResource i in dataList)
     {
-        var dataNode = new XElement(oneName, resourcePath + i.Name.Content + fileExtension);
-        datasNode.Add(dataNode);
+        var resourceNode = new XElement(oneName, resourcePath + i.Name.Content + fileExtension);
+        resourcesNode.Add(resourceNode);
     }
-    rootNode.Add(datasNode);
+    rootNode.Add(resourcesNode);
 }
