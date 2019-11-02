@@ -22,43 +22,41 @@ if (Directory.Exists(projFolder))
 
 Directory.CreateDirectory(projFolder);
 
-//UpdateProgressBar (null, "Exporting backgrounds...", progress++, 8);
+// --------------- Start exporting ---------------
 
-// --------------- 开始导出 ---------------
-
-// 执行导出精灵
+// Export sprites
 UpdateProgressBar(null, "Exporting sprites...", progress++, 8);
 await ExportSprites();
 
-// 执行导出背景
+// Export backgrounds
 UpdateProgressBar(null, "Exporting backgrounds...", progress++, 8);
 await ExportBackground();
 
-// 执行导出对象
+// Export objects
 UpdateProgressBar(null, "Exporting objects...", progress++, 8);
 await ExportGameObjects();
 
-// 执行导出房间
+// Export rooms
 UpdateProgressBar(null, "Exporting rooms...", progress++, 8);
 await ExportRooms();
 
-// 执行导出声音
+// Export sounds
 UpdateProgressBar(null, "Exporting sounds...", progress++, 8);
 await ExportSounds();
 
-// 执行导出脚本
+// Export scripts
 UpdateProgressBar(null, "Exporting scripts...", progress++, 8);
 await ExportScripts();
 
-// 执行导出字体
+// Export fonts
 UpdateProgressBar(null, "Exporting fonts...", progress++, 8);
 await ExportFonts();
 
-// 执行导出项目文件
-UpdateProgressBar(null, "Exporting project file...", progress++, 8);
+// Generate project file
+UpdateProgressBar(null, "Generating project file...", progress++, 8);
 ExportProjectFile();
 
-// --------------- 导出完毕 ---------------
+// --------------- Export completed ---------------
 worker.Cleanup();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + projFolder);
@@ -69,10 +67,11 @@ string GetFolder(string path)
 }
 string BoolToString(bool value)
 {
+    // In the GMX file, -1 is true and 0 is false.
     return value ? "-1" : "0";
 }
 
-// --------------- 导出精灵 ---------------
+// --------------- Export Sprite ---------------
 async Task ExportSprites()
 {
     Directory.CreateDirectory(projFolder + "/sprites/images");
@@ -80,7 +79,7 @@ async Task ExportSprites()
 }
 void ExportSprite(UndertaleSprite sprite)
 {
-    // 保存精灵GMX
+    // Save the sprite GMX
     var xmlWriter = XmlWriter.Create(projFolder + "/sprites/" + sprite.Name.Content + ".sprite.gmx");
     xmlWriter.WriteStartDocument();
 
@@ -173,13 +172,13 @@ void ExportSprite(UndertaleSprite sprite)
     xmlWriter.WriteEndDocument();
     xmlWriter.Close();
 
-    // 保存精灵图像
+    // Save sprite images
     for (int i = 0; i < sprite.Textures.Count; i++)
         if (sprite.Textures[i]?.Texture != null)
             worker.ExportAsPNG(sprite.Textures[i].Texture, projFolder + "/sprites/images/" + sprite.Name.Content + "_" + i + ".png");
 }
 
-// --------------- 导出背景 ---------------
+// --------------- Export Background ---------------
 async Task ExportBackground()
 {
     Directory.CreateDirectory(projFolder + "/backgrounds/images");
@@ -187,7 +186,7 @@ async Task ExportBackground()
 }
 void ExportBackground(UndertaleBackground background)
 {
-    // 保存背景GMX
+    // Save the backgound GMX
     var xmlWriter = XmlWriter.Create(projFolder + "/backgrounds/" + background.Name.Content + ".background.gmx");
     xmlWriter.WriteStartDocument();
 
@@ -255,10 +254,10 @@ void ExportBackground(UndertaleBackground background)
     xmlWriter.WriteEndDocument();
     xmlWriter.Close();
 
-    // 保存背景图像
+    // Save background images
     worker.ExportAsPNG(background.Texture, projFolder + "/backgrounds/images/" + background.Name.Content + ".png");
 }
-// --------------- 导出对象 ---------------
+// --------------- Export Object ---------------
 async Task ExportGameObjects()
 {
     Directory.CreateDirectory(projFolder + "/objects");
@@ -266,157 +265,153 @@ async Task ExportGameObjects()
 }
 void ExportGameObject(UndertaleGameObject gameObject)
 {
-    //try
+    // Save the object GMX
+    var xmlWriter = XmlWriter.Create(projFolder + "/objects/" + gameObject.Name.Content + ".object.gmx");
+    xmlWriter.WriteStartDocument();
+
+    xmlWriter.WriteStartElement("object");
+
+    xmlWriter.WriteStartElement("spriteName");
+    xmlWriter.WriteString(gameObject.Sprite is null ? "<undefined>" : gameObject.Sprite.Name.Content);
+    xmlWriter.WriteEndElement();
+
+    xmlWriter.WriteStartElement("solid");
+    xmlWriter.WriteString(BoolToString(gameObject.Solid));
+    xmlWriter.WriteEndElement();
+
+    xmlWriter.WriteStartElement("visible");
+    xmlWriter.WriteString(BoolToString(gameObject.Visible));
+    xmlWriter.WriteEndElement();
+
+    xmlWriter.WriteStartElement("depth");
+    xmlWriter.WriteString(gameObject.Depth.ToString());
+    xmlWriter.WriteEndElement();
+
+    xmlWriter.WriteStartElement("persistent");
+    xmlWriter.WriteString(BoolToString(gameObject.Persistent));
+    xmlWriter.WriteEndElement();
+
+    xmlWriter.WriteStartElement("parentName");
+    xmlWriter.WriteString(gameObject.ParentId is null ? "<undefined>" : gameObject.ParentId.Name.Content);
+    xmlWriter.WriteEndElement();
+
+    xmlWriter.WriteStartElement("maskName");
+    xmlWriter.WriteString(gameObject.TextureMaskId is null ? "<undefined>" : gameObject.TextureMaskId.Name.Content);
+    xmlWriter.WriteEndElement();
+
+    // Save events
+    xmlWriter.WriteStartElement("events");
+
+    // Traversing the event type list
+    for (int i = 0; i < gameObject.Events.Count; i++)
     {
-        // 保存对象GMX
-        var xmlWriter = XmlWriter.Create(projFolder + "/objects/" + gameObject.Name.Content + ".object.gmx");
-        xmlWriter.WriteStartDocument();
-
-        xmlWriter.WriteStartElement("object");
-
-        xmlWriter.WriteStartElement("spriteName");
-        xmlWriter.WriteString(gameObject.Sprite is null ? "<undefined>" : gameObject.Sprite.Name.Content);
-        xmlWriter.WriteEndElement();
-
-        xmlWriter.WriteStartElement("solid");
-        xmlWriter.WriteString(BoolToString(gameObject.Solid));
-        xmlWriter.WriteEndElement();
-
-        xmlWriter.WriteStartElement("visible");
-        xmlWriter.WriteString(BoolToString(gameObject.Visible));
-        xmlWriter.WriteEndElement();
-
-        xmlWriter.WriteStartElement("depth");
-        xmlWriter.WriteString(gameObject.Depth.ToString());
-        xmlWriter.WriteEndElement();
-
-        xmlWriter.WriteStartElement("persistent");
-        xmlWriter.WriteString(BoolToString(gameObject.Persistent));
-        xmlWriter.WriteEndElement();
-
-        xmlWriter.WriteStartElement("parentName");
-        xmlWriter.WriteString(gameObject.ParentId is null ? "<undefined>" : gameObject.ParentId.Name.Content);
-        xmlWriter.WriteEndElement();
-
-        xmlWriter.WriteStartElement("maskName");
-        xmlWriter.WriteString(gameObject.TextureMaskId is null ? "<undefined>" : gameObject.TextureMaskId.Name.Content);
-        xmlWriter.WriteEndElement();
-
-        // 保存事件
-        xmlWriter.WriteStartElement("events");
-
-        // 遍历事件类型列表
-        for (int i = 0; i < gameObject.Events.Count; i++)
+        // Determine if an event is empty
+        if (gameObject.Events[i].Count > 0)
         {
-            // 判断某个事件类型是否为空
-            if (gameObject.Events[i].Count > 0)
+            // Traversing event list
+            foreach (var j in gameObject.Events[i])
             {
-                // 遍历事件列表
-                foreach (var j in gameObject.Events[i])
+                xmlWriter.WriteStartElement("event");
+
+                xmlWriter.WriteAttributeString("eventtype", i.ToString());
+
+                if (j.EventSubtype == 4)
                 {
-                    xmlWriter.WriteStartElement("event");
+                    // To get the actual name of the collision object when the event type is a collision event
+                    xmlWriter.WriteAttributeString("ename", Data.GameObjects[(int)j.EventSubtype].Name.Content);
+                }
+                else
+                {
+                    // Get the sub-event number directly
+                    xmlWriter.WriteAttributeString("enumb", j.EventSubtype.ToString());
+                }
 
-                    xmlWriter.WriteAttributeString("eventtype", i.ToString());
+                // Save action
+                xmlWriter.WriteStartElement("action");
 
-                    if (j.EventSubtype == 4)
-                    {
-                        // 当事件类型为碰撞事件时，要获取碰撞对象的实际名字
-                        xmlWriter.WriteAttributeString("ename", Data.GameObjects[(int)j.EventSubtype].Name.Content);
-                    }
-                    else
-                    {
-                        // 直接获取子事件编号
-                        xmlWriter.WriteAttributeString("enumb", j.EventSubtype.ToString());
-                    }
-
-                    // 保存动作
-                    xmlWriter.WriteStartElement("action");
-
-                    // 遍历动作列表
-                    foreach (var k in j.Actions)
-                    {
-                        xmlWriter.WriteStartElement("libid");
-                        xmlWriter.WriteString(k.LibID.ToString());
-                        xmlWriter.WriteEndElement();
-
-                        xmlWriter.WriteStartElement("id");
-                        xmlWriter.WriteString(k.ID.ToString());
-                        xmlWriter.WriteEndElement();
-
-                        xmlWriter.WriteStartElement("kind");
-                        xmlWriter.WriteString(k.Kind.ToString());
-                        xmlWriter.WriteEndElement();
-
-                        xmlWriter.WriteStartElement("userelative");
-                        xmlWriter.WriteString(BoolToString(k.UseRelative));
-                        xmlWriter.WriteEndElement();
-
-                        xmlWriter.WriteStartElement("isquestion");
-                        xmlWriter.WriteString(BoolToString(k.IsQuestion));
-                        xmlWriter.WriteEndElement();
-
-                        xmlWriter.WriteStartElement("useapplyto");
-                        xmlWriter.WriteString(BoolToString(k.UseApplyTo));
-                        xmlWriter.WriteEndElement();
-
-                        xmlWriter.WriteStartElement("exetype");
-                        xmlWriter.WriteString(k.ExeType.ToString());
-                        xmlWriter.WriteEndElement();
-
-                        xmlWriter.WriteStartElement("functionname");
-                        xmlWriter.WriteString(k.ActionName.Content);
-                        xmlWriter.WriteEndElement();
-
-                        xmlWriter.WriteStartElement("codestring");
-                        xmlWriter.WriteString("");
-                        xmlWriter.WriteEndElement();
-
-                        xmlWriter.WriteStartElement("whoName");
-                        // 在data.win中所有DND动作被转换为字节码，自动处理执行者
-                        xmlWriter.WriteString("self");
-                        xmlWriter.WriteEndElement();
-
-                        xmlWriter.WriteStartElement("relative");
-                        xmlWriter.WriteString(BoolToString(k.Relative));
-                        xmlWriter.WriteEndElement();
-
-                        xmlWriter.WriteStartElement("isnot");
-                        xmlWriter.WriteString(BoolToString(k.IsNot));
-                        xmlWriter.WriteEndElement();
-
-                        xmlWriter.WriteStartElement("arguments");
-                        xmlWriter.WriteStartElement("argument");
-
-                        xmlWriter.WriteStartElement("kind");
-                        xmlWriter.WriteString("1");
-                        xmlWriter.WriteEndElement();
-
-                        xmlWriter.WriteStartElement("string");
-                        xmlWriter.WriteString(k.CodeId != null ? Decompiler.Decompile(k.CodeId, DECOMPILE_CONTEXT.Value) : "");
-                        xmlWriter.WriteEndElement();
-
-                        xmlWriter.WriteEndElement();
-                        xmlWriter.WriteEndElement();
-                    }
-                    // TODO：UTMT没有给出关于对象物理的属性
-
+                // Traversing the action list
+                foreach (var k in j.Actions)
+                {
+                    xmlWriter.WriteStartElement("libid");
+                    xmlWriter.WriteString(k.LibID.ToString());
                     xmlWriter.WriteEndElement();
 
+                    xmlWriter.WriteStartElement("id");
+                    xmlWriter.WriteString(k.ID.ToString());
+                    xmlWriter.WriteEndElement();
+
+                    xmlWriter.WriteStartElement("kind");
+                    xmlWriter.WriteString(k.Kind.ToString());
+                    xmlWriter.WriteEndElement();
+
+                    xmlWriter.WriteStartElement("userelative");
+                    xmlWriter.WriteString(BoolToString(k.UseRelative));
+                    xmlWriter.WriteEndElement();
+
+                    xmlWriter.WriteStartElement("isquestion");
+                    xmlWriter.WriteString(BoolToString(k.IsQuestion));
+                    xmlWriter.WriteEndElement();
+
+                    xmlWriter.WriteStartElement("useapplyto");
+                    xmlWriter.WriteString(BoolToString(k.UseApplyTo));
+                    xmlWriter.WriteEndElement();
+
+                    xmlWriter.WriteStartElement("exetype");
+                    xmlWriter.WriteString(k.ExeType.ToString());
+                    xmlWriter.WriteEndElement();
+
+                    xmlWriter.WriteStartElement("functionname");
+                    xmlWriter.WriteString(k.ActionName.Content);
+                    xmlWriter.WriteEndElement();
+
+                    xmlWriter.WriteStartElement("codestring");
+                    xmlWriter.WriteString("");
+                    xmlWriter.WriteEndElement();
+
+                    xmlWriter.WriteStartElement("whoName");
+                    // All DND actions in data.win are converted to assembly code, automatically processing the performer
+                    xmlWriter.WriteString("self");
+                    xmlWriter.WriteEndElement();
+
+                    xmlWriter.WriteStartElement("relative");
+                    xmlWriter.WriteString(BoolToString(k.Relative));
+                    xmlWriter.WriteEndElement();
+
+                    xmlWriter.WriteStartElement("isnot");
+                    xmlWriter.WriteString(BoolToString(k.IsNot));
+                    xmlWriter.WriteEndElement();
+
+                    xmlWriter.WriteStartElement("arguments");
+                    xmlWriter.WriteStartElement("argument");
+
+                    xmlWriter.WriteStartElement("kind");
+                    xmlWriter.WriteString("1");
+                    xmlWriter.WriteEndElement();
+
+                    xmlWriter.WriteStartElement("string");
+                    xmlWriter.WriteString(k.CodeId != null ? Decompiler.Decompile(k.CodeId, DECOMPILE_CONTEXT.Value) : "");
+                    xmlWriter.WriteEndElement();
+
+                    xmlWriter.WriteEndElement();
                     xmlWriter.WriteEndElement();
                 }
+                // TODO：Physics
+
+                xmlWriter.WriteEndElement();
+
+                xmlWriter.WriteEndElement();
             }
         }
-
-        xmlWriter.WriteEndElement();
-
-        xmlWriter.WriteEndElement();
-        xmlWriter.WriteEndDocument();
-        xmlWriter.Close();
     }
-    //catch { }
+
+    xmlWriter.WriteEndElement();
+
+    xmlWriter.WriteEndElement();
+    xmlWriter.WriteEndDocument();
+    xmlWriter.Close();
 }
 
-// --------------- 导出房间 ---------------
+// --------------- Export Room ---------------
 async Task ExportRooms()
 {
     Directory.CreateDirectory(projFolder + "/rooms");
@@ -424,13 +419,13 @@ async Task ExportRooms()
 }
 void ExportRoom(UndertaleRoom room)
 {
-    // 保存房间GMX
+    // Save the room GMX
     var xmlWriter = XmlWriter.Create(projFolder + "/rooms/" + room.Name.Content + ".room.gmx");
     xmlWriter.WriteStartDocument();
 
     xmlWriter.WriteStartElement("room");
 
-    // 基本设定
+    // Room settings
     xmlWriter.WriteStartElement("caption");
     xmlWriter.WriteString(room.Caption.Content);
     xmlWriter.WriteEndElement();
@@ -487,9 +482,9 @@ void ExportRoom(UndertaleRoom room)
     xmlWriter.WriteString(BoolToString(room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.ClearDisplayBuffer)));
     xmlWriter.WriteEndElement();
 
-    // TODO：这里原room文件有一些makerSettings，看似不必要就没有生成
+    // TODO：MakerSettings
 
-    // 背景
+    // Room backgrounds
     xmlWriter.WriteStartElement("backgrounds");
     foreach (var i in room.Backgrounds)
     {
@@ -504,14 +499,14 @@ void ExportRoom(UndertaleRoom room)
         xmlWriter.WriteAttributeString("vtiled", i.TileY.ToString());
         xmlWriter.WriteAttributeString("hspeed", i.SpeedX.ToString());
         xmlWriter.WriteAttributeString("vspeed", i.SpeedY.ToString());
-        // TODO：这里stretch属性UTMT中没有给出
+        // TODO：Stretch
         xmlWriter.WriteAttributeString("stretch", "0");
 
         xmlWriter.WriteEndElement();
     }
     xmlWriter.WriteEndElement();
 
-    // 视野
+    // Room views
     xmlWriter.WriteStartElement("views");
     foreach (var i in room.Views)
     {
@@ -536,7 +531,7 @@ void ExportRoom(UndertaleRoom room)
     }
     xmlWriter.WriteEndElement();
 
-    // 实例
+    // Room instances
     xmlWriter.WriteStartElement("instances");
     foreach (var i in room.GameObjects)
     {
@@ -546,7 +541,7 @@ void ExportRoom(UndertaleRoom room)
         xmlWriter.WriteAttributeString("x", i.X.ToString());
         xmlWriter.WriteAttributeString("y", i.Y.ToString());
         xmlWriter.WriteAttributeString("name", "inst_" + i.InstanceID.ToString("X"));
-        // TODO：这里的locked属性UTMT里没有给出
+        // TODO：Locked
         xmlWriter.WriteAttributeString("locked", "0");
         xmlWriter.WriteAttributeString("code", i.CreationCode != null ? Decompiler.Decompile(i.CreationCode, DECOMPILE_CONTEXT.Value) : "");
         xmlWriter.WriteAttributeString("scaleX", i.ScaleX.ToString());
@@ -558,7 +553,7 @@ void ExportRoom(UndertaleRoom room)
     }
     xmlWriter.WriteEndElement();
 
-    // 贴图
+    // Room tiles
     xmlWriter.WriteStartElement("tiles");
     foreach (var i in room.Tiles)
     {
@@ -574,7 +569,7 @@ void ExportRoom(UndertaleRoom room)
         xmlWriter.WriteAttributeString("id", i.InstanceID.ToString());
         xmlWriter.WriteAttributeString("name", "inst_" + i.InstanceID.ToString("X"));
         xmlWriter.WriteAttributeString("depth", i.TileDepth.ToString());
-        // TODO：这里的locked属性UTMT里没有给出
+        // TODO：Locked
         xmlWriter.WriteAttributeString("locked", "0");
         xmlWriter.WriteAttributeString("colour", i.Color.ToString());
         xmlWriter.WriteAttributeString("scaleX", i.ScaleX.ToString());
@@ -584,14 +579,14 @@ void ExportRoom(UndertaleRoom room)
     }
     xmlWriter.WriteEndElement();
 
-    // TODO：UTMT没有给出关于房间物理的属性
+    // TODO：Room physics
 
     xmlWriter.WriteEndElement();
     xmlWriter.WriteEndDocument();
     xmlWriter.Close();
 }
 
-// --------------- 导出声音 ---------------
+// --------------- Export Sound ---------------
 async Task ExportSounds()
 {
     Directory.CreateDirectory(projFolder + "/sound/audio");
@@ -599,14 +594,14 @@ async Task ExportSounds()
 }
 void ExportSound(UndertaleSound sound)
 {
-    // 保存声音GMX
+    // Save the sound GMX
     var xmlWriter = XmlWriter.Create(projFolder + "/sound/" + sound.Name.Content + ".sound.gmx");
     xmlWriter.WriteStartDocument();
 
     xmlWriter.WriteStartElement("sound");
 
     xmlWriter.WriteStartElement("kind");
-    // TODO：UTMT没有给出kind属性，这里通过文件扩展名进行推断
+    // Inferred by file extension
     xmlWriter.WriteString(Path.GetExtension(sound.File.Content) == ".ogg" ? "3" : "0");
     xmlWriter.WriteEndElement();
 
@@ -627,38 +622,38 @@ void ExportSound(UndertaleSound sound)
     xmlWriter.WriteEndElement();
 
     xmlWriter.WriteStartElement("pan");
-    // TODO：UTMT中未给出声道属性
+    // TODO：Pan
     xmlWriter.WriteString("0");
     xmlWriter.WriteEndElement();
 
     xmlWriter.WriteStartElement("bitRates");
-    // TODO：UTMT中未给出比特率属性
+    // TODO：BitRates
     xmlWriter.WriteString("192");
     xmlWriter.WriteEndElement();
 
     xmlWriter.WriteStartElement("sampleRates");
-    // TODO：UTMT中未给出采样率属性
+    // TODO：SampleRates
     xmlWriter.WriteStartElement("sampleRate");
     xmlWriter.WriteString("44100");
     xmlWriter.WriteEndElement();
     xmlWriter.WriteEndElement();
 
     xmlWriter.WriteStartElement("types");
-    // TODO：UTMT中未给出类型属性
+    // TODO：Types
     xmlWriter.WriteStartElement("type");
     xmlWriter.WriteString("1");
     xmlWriter.WriteEndElement();
     xmlWriter.WriteEndElement();
 
     xmlWriter.WriteStartElement("bitDepths");
-    // TODO：UTMT中未给出bitDepths属性
+    // TODO：BitDepths
     xmlWriter.WriteStartElement("bitDepth");
     xmlWriter.WriteString("16");
     xmlWriter.WriteEndElement();
     xmlWriter.WriteEndElement();
 
     xmlWriter.WriteStartElement("preload");
-    // TODO：UTMT中未给出preload属性
+    // TODO：Preload
     xmlWriter.WriteString("-1");
     xmlWriter.WriteEndElement();
 
@@ -667,22 +662,22 @@ void ExportSound(UndertaleSound sound)
     xmlWriter.WriteEndElement();
 
     xmlWriter.WriteStartElement("compressed");
-    // TODO：UTMT中未给出compressed属性，这里通过文件扩展名进行推断
+    // Inferred by file extension
     xmlWriter.WriteString(Path.GetExtension(sound.File.Content) == ".ogg" ? "1" : "0");
     xmlWriter.WriteEndElement();
 
     xmlWriter.WriteStartElement("streamed");
-    // TODO：UTMT中未给出streamed属性，这里通过文件扩展名进行推断
+    // Inferred by file extension
     xmlWriter.WriteString(Path.GetExtension(sound.File.Content) == ".ogg" ? "1" : "0");
     xmlWriter.WriteEndElement();
 
     xmlWriter.WriteStartElement("uncompressOnLoad");
-    // TODO：UTMT中未给出uncompressOnLoad属性
+    // TODO：UncompressOnLoad
     xmlWriter.WriteString("0");
     xmlWriter.WriteEndElement();
 
     xmlWriter.WriteStartElement("audioGroup");
-    // TODO：UTMT中给出了音频组，但并不明确
+    // TODO：AudioGroup
     xmlWriter.WriteString("0");
     xmlWriter.WriteEndElement();
 
@@ -690,12 +685,12 @@ void ExportSound(UndertaleSound sound)
     xmlWriter.WriteEndDocument();
     xmlWriter.Close();
 
-    // 保存音频文件
+    // Save sound files
     if (sound.AudioFile != null)
         File.WriteAllBytes(projFolder + "/sound/audio/" + sound.File.Content, sound.AudioFile.Data);
 }
 
-// --------------- 导出脚本 ---------------
+// --------------- Export Script ---------------
 async Task ExportScripts()
 {
     Directory.CreateDirectory(projFolder + "/scripts/");
@@ -703,11 +698,11 @@ async Task ExportScripts()
 }
 void ExportScript(UndertaleScript script)
 {
-    // 保存脚本GML
+    // Save GML files
     File.WriteAllText(projFolder + "/scripts/" + script.Name.Content + ".gml", (script.Code != null ? Decompiler.Decompile(script.Code, DECOMPILE_CONTEXT.Value) : ""));
 }
 
-// --------------- 导出字体 ---------------
+// --------------- Export Font ---------------
 async Task ExportFonts()
 {
     Directory.CreateDirectory(projFolder + "/fonts/");
@@ -715,7 +710,7 @@ async Task ExportFonts()
 }
 void ExportFont(UndertaleFont font)
 {
-    // 保存字体GMX
+    // Save the font GMX
     var xmlWriter = XmlWriter.Create(projFolder + "/fonts/" + font.Name.Content + ".font.gmx");
     xmlWriter.WriteStartDocument();
 
@@ -795,14 +790,14 @@ void ExportFont(UndertaleFont font)
     xmlWriter.WriteEndDocument();
     xmlWriter.Close();
 
-    // 保存字体图像
+    // Save font textures
     worker.ExportAsPNG(font.Texture, projFolder + "/fonts/" + font.Name.Content + ".png");
 }
 
-// --------------- 导出项目文件 ---------------
+// --------------- Generate project file ---------------
 void ExportProjectFile()
 {
-    // 保存字体GMX
+    // Write all resource indexes to project.gmx
     var xmlWriter = XmlWriter.Create(projFolder + "Export_Project.project.gmx");
     xmlWriter.WriteStartDocument();
 
