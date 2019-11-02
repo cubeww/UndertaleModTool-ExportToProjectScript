@@ -28,36 +28,42 @@ Directory.CreateDirectory(projFolder);
 
 // --------------- Start exporting ---------------
 
+var resourceNum = 9;
+
 // Export sprites
-UpdateProgressBar(null, "Exporting sprites...", progress++, 8);
+UpdateProgressBar(null, "Exporting sprites...", progress++, resourceNum);
 await ExportSprites();
 
 // Export backgrounds
-UpdateProgressBar(null, "Exporting backgrounds...", progress++, 8);
+UpdateProgressBar(null, "Exporting backgrounds...", progress++, resourceNum);
 await ExportBackground();
 
 // Export objects
-UpdateProgressBar(null, "Exporting objects...", progress++, 8);
+UpdateProgressBar(null, "Exporting objects...", progress++, resourceNum);
 await ExportGameObjects();
 
 // Export rooms
-UpdateProgressBar(null, "Exporting rooms...", progress++, 8);
+UpdateProgressBar(null, "Exporting rooms...", progress++, resourceNum);
 await ExportRooms();
 
 // Export sounds
-UpdateProgressBar(null, "Exporting sounds...", progress++, 8);
+UpdateProgressBar(null, "Exporting sounds...", progress++, resourceNum);
 await ExportSounds();
 
 // Export scripts
-UpdateProgressBar(null, "Exporting scripts...", progress++, 8);
+UpdateProgressBar(null, "Exporting scripts...", progress++, resourceNum);
 await ExportScripts();
 
 // Export fonts
-UpdateProgressBar(null, "Exporting fonts...", progress++, 8);
+UpdateProgressBar(null, "Exporting fonts...", progress++, resourceNum);
 await ExportFonts();
 
+// Export paths
+UpdateProgressBar(null, "Exporting paths...", progress++, resourceNum);
+await ExportPaths();
+
 // Generate project file
-UpdateProgressBar(null, "Generating project file...", progress++, 8);
+UpdateProgressBar(null, "Generating project file...", progress++, resourceNum);
 ExportProjectFile();
 
 // --------------- Export completed ---------------
@@ -498,6 +504,39 @@ void ExportFont(UndertaleFont font)
     // Save font textures
     worker.ExportAsPNG(font.Texture, projFolder + "/fonts/" + font.Name.Content + ".png");
 }
+
+// --------------- Export Paths ---------------
+async Task ExportPaths()
+{
+    Directory.CreateDirectory(projFolder + "/paths");
+    await Task.Run(() => Parallel.ForEach(Data.Paths, ExportPath));
+}
+void ExportPath(UndertalePath path)
+{
+    // Save the path GMX
+    var gmx = new XDocument(
+        new XComment(gmxDeclaration),
+        new XElement("path",
+            new XElement("kind", "0"),
+            new XElement("close", BoolToString(path.IsClosed)),
+            new XElement("precision", path.Precision.ToString()),
+            new XElement("backroom", "-1"),
+            new XElement("hsnap", "16"),
+            new XElement("vsnap", "16"),
+            new XElement("points")
+        )
+    );
+    foreach (var i in path.Points)
+    {
+        var pointsNode = gmx.Element("path").Element("points");
+        pointsNode.Add(
+            new XElement("point", $"{i.X.ToString()},{i.Y.ToString()},{i.Speed.ToString()}")
+        );
+    }
+
+    File.WriteAllText(projFolder + "/paths/" + path.Name.Content + ".path.gmx", gmx.ToString());
+}
+
 
 // --------------- Generate project file ---------------
 void ExportProjectFile()
