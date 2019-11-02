@@ -250,8 +250,7 @@ void ExportGameObject(UndertaleGameObject gameObject)
                         new XElement("libid", k.LibID.ToString()),
                         new XElement("id", k.ID.ToString()),
                         new XElement("kind", k.Kind.ToString()),
-                        new XElement("userelative", k.LibID.ToString()),
-                        new XElement("libid", BoolToString(k.UseRelative)),
+                        new XElement("userelative", BoolToString(k.UseRelative)),
                         new XElement("isquestion", BoolToString(k.IsQuestion)),
                         new XElement("useapplyto", BoolToString(k.UseApplyTo)),
                         new XElement("exetype", k.ExeType.ToString()),
@@ -522,7 +521,7 @@ void ExportPath(UndertalePath path)
         new XComment(gmxDeclaration),
         new XElement("path",
             new XElement("kind", "0"),
-            new XElement("close", BoolToString(path.IsClosed)),
+            new XElement("closed", BoolToString(path.IsClosed)),
             new XElement("precision", path.Precision.ToString()),
             new XElement("backroom", "-1"),
             new XElement("hsnap", "16"),
@@ -558,26 +557,28 @@ void ExportTimeline(UndertaleTimeline timeline)
     {
         var entryNode = new XElement("entry");
         entryNode.Add(new XElement("step", i.Item1));
+        entryNode.Add(new XElement("event"));
         foreach (var j in i.Item2)
         {
-            entryNode.Add(
-                new XElement("libid", j.LibID.ToString()),
-                new XElement("id", j.ID.ToString()),
-                new XElement("kind", j.Kind.ToString()),
-                new XElement("userelative", j.LibID.ToString()),
-                new XElement("libid", BoolToString(j.UseRelative)),
-                new XElement("isquestion", BoolToString(j.IsQuestion)),
-                new XElement("useapplyto", BoolToString(j.UseApplyTo)),
-                new XElement("exetype", j.ExeType.ToString()),
-                new XElement("functionname", j.ActionName.Content),
-                new XElement("codestring", ""),
-                new XElement("whoName", "self"),
-                new XElement("relative", BoolToString(j.Relative)),
-                new XElement("isnot", BoolToString(j.IsNot)),
-                new XElement("arguments",
-                    new XElement("argument",
-                        new XElement("kind", "1"),
-                        new XElement("string", j.CodeId != null ? Decompiler.Decompile(j.CodeId, DECOMPILE_CONTEXT.Value) : "")
+            entryNode.Element("event").Add(
+                new XElement("action",
+                    new XElement("libid", j.LibID.ToString()),
+                    new XElement("id", j.ID.ToString()),
+                    new XElement("kind", j.Kind.ToString()),
+                    new XElement("userelative", BoolToString(j.UseRelative)),
+                    new XElement("isquestion", BoolToString(j.IsQuestion)),
+                    new XElement("useapplyto", BoolToString(j.UseApplyTo)),
+                    new XElement("exetype", j.ExeType.ToString()),
+                    new XElement("functionname", j.ActionName.Content),
+                    new XElement("codestring", ""),
+                    new XElement("whoName", "self"),
+                    new XElement("relative", BoolToString(j.Relative)),
+                    new XElement("isnot", BoolToString(j.IsNot)),
+                    new XElement("arguments",
+                        new XElement("argument",
+                            new XElement("kind", "1"),
+                            new XElement("string", j.CodeId != null ? Decompiler.Decompile(j.CodeId, DECOMPILE_CONTEXT.Value) : "")
+                        )
                     )
                 )
             );
