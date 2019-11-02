@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using System.Drawing;
+using System.Reflection;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 using UndertaleModLib.Decompiler;
@@ -85,7 +86,7 @@ void ExportSprite(UndertaleSprite sprite)
     // Save the sprite GMX
     var gmx = new XDocument(
         new XComment(gmxDeclaration),
-        new XElement("sprite", 
+        new XElement("sprite",
             new XElement("type", "0"),
             new XElement("xorig", sprite.OriginX.ToString()),
             new XElement("yorigin", sprite.OriginY.ToString()),
@@ -99,7 +100,7 @@ void ExportSprite(UndertaleSprite sprite)
             new XElement("bbox_bottom", sprite.MarginBottom.ToString()),
             new XElement("HTile", "0"),
             new XElement("VTile", "0"),
-            new XElement("TextureGroups", 
+            new XElement("TextureGroups",
                 new XElement("TextureGroup0", "0")
             ),
             new XElement("For3D", "0"),
@@ -155,7 +156,7 @@ void ExportBackground(UndertaleBackground background)
     // Save the backgound GMX
     var gmx = new XDocument(
         new XComment(gmxDeclaration),
-        new XElement("background", 
+        new XElement("background",
             new XElement("istileset", "-1"),
             new XElement("tilewidth", background.Texture.BoundingWidth.ToString()),
             new XElement("tileheight", background.Texture.BoundingHeight.ToString()),
@@ -165,7 +166,7 @@ void ExportBackground(UndertaleBackground background)
             new XElement("tilevsep", "0"),
             new XElement("HTile", "-1"),
             new XElement("VTile", "-1"),
-            new XElement("TextureGroups", 
+            new XElement("TextureGroups",
                 new XElement("TextureGroup0", "0")
             ),
             new XElement("For3D", "0"),
@@ -176,7 +177,7 @@ void ExportBackground(UndertaleBackground background)
     );
 
     File.WriteAllText(projFolder + "/background/" + background.Name.Content + ".background.gmx", gmx.ToString());
-   
+
     // Save background images
     worker.ExportAsPNG(background.Texture, projFolder + "/background/images/" + background.Name.Content + ".png");
 }
@@ -191,7 +192,7 @@ void ExportGameObject(UndertaleGameObject gameObject)
     // Save the object GMX
     var gmx = new XDocument(
         new XComment(gmxDeclaration),
-        new XElement("object", 
+        new XElement("object",
             new XElement("spriteName", gameObject.Sprite is null ? "<undefined>" : gameObject.Sprite.Name.Content),
             new XElement("solid", BoolToString(gameObject.Solid)),
             new XElement("visible", BoolToString(gameObject.Visible)),
@@ -250,9 +251,9 @@ void ExportGameObject(UndertaleGameObject gameObject)
                         new XElement("relative", BoolToString(k.Relative)),
                         new XElement("isnot", BoolToString(k.IsNot)),
                         new XElement("arguments",
-                            new XElement("argument", 
+                            new XElement("argument",
                                 new XElement("kind", "1"),
-                                new XElement("string", k.CodeId != null ? Decompiler.Decompile(k.CodeId, DECOMPILE_CONTEXT.Value) : "") 
+                                new XElement("string", k.CodeId != null ? Decompiler.Decompile(k.CodeId, DECOMPILE_CONTEXT.Value) : "")
                             )
                         )
                     );
@@ -279,7 +280,7 @@ void ExportRoom(UndertaleRoom room)
     // Save the room GMX
     var gmx = new XDocument(
         new XComment(gmxDeclaration),
-        new XElement("room", 
+        new XElement("room",
             new XElement("caption", room.Caption.Content),
             new XElement("width", room.Width.ToString()),
             new XElement("height", room.Height.ToString()),
@@ -400,7 +401,7 @@ void ExportSound(UndertaleSound sound)
     // Save the sound GMX
     var gmx = new XDocument(
         new XComment(gmxDeclaration),
-        new XElement("sound", 
+        new XElement("sound",
             new XElement("kind", Path.GetExtension(sound.File.Content) == ".ogg" ? "3" : "0"),
             new XElement("extension", Path.GetExtension(sound.File.Content)),
             new XElement("origname", "sound\\audio\\" + sound.File.Content),
@@ -408,13 +409,13 @@ void ExportSound(UndertaleSound sound)
             new XElement("volume", sound.Volume.ToString()),
             new XElement("pan", "0"),
             new XElement("bitRates", "192"),
-            new XElement("sampleRates", 
+            new XElement("sampleRates",
                 new XElement("sampleRate", "44100")
             ),
-            new XElement("types", 
+            new XElement("types",
                 new XElement("type", "1")
             ),
-            new XElement("bitDepths", 
+            new XElement("bitDepths",
                 new XElement("bitDepth", "16")
             ),
             new XElement("preload", "-1"),
@@ -456,7 +457,7 @@ void ExportFont(UndertaleFont font)
     // Save the font GMX
     var gmx = new XDocument(
         new XComment(gmxDeclaration),
-        new XElement("font", 
+        new XElement("font",
             new XElement("name", font.Name.Content),
             new XElement("size", font.EmSize.ToString()),
             new XElement("bold", BoolToString(font.Bold)),
@@ -466,10 +467,10 @@ void ExportFont(UndertaleFont font)
             new XElement("aa", font.AntiAliasing.ToString()),
             new XElement("includeTTF", "0"),
             new XElement("TTFName", ""),
-            new XElement("texgroups", 
+            new XElement("texgroups",
                 new XElement("texgroup", "0")
             ),
-            new XElement("ranges", 
+            new XElement("ranges",
                 new XElement("range0", font.RangeStart.ToString() + "," + font.RangeEnd.ToString())
             ),
             new XElement("glyphs"),
@@ -507,25 +508,25 @@ void ExportProjectFile()
         new XElement("assets")
     );
 
-    WriteIndexes<UndertaleSound>("sounds",      "sound",        Data.Sounds,        "sound",        "sound\\" + i.Name.Content,             gmx.Element("assets"));
-    WriteIndexes<UndertaleSprite>("sprites",     "sprites",      Data.Sprites,       "sprite",       "sprites\\" + i.Name.Content,           gmx.Element("assets"));
-    WriteIndexes<UndertaleBackground>("backgrounds", "background",   Data.Backgrounds,   "background",   "background\\" + i.Name.Content,        gmx.Element("assets"));
-    WriteIndexes<UndertaleScript>("scripts",     "scripts",      Data.Scripts,       "script",       "scripts\\" + i.Name.Content + ".gml",  gmx.Element("assets"));
-    WriteIndexes<UndertaleFont>("fonts",       "fonts",        Data.Fonts,         "font",         "fonts\\" + i.Name.Content,             gmx.Element("assets"));
-    WriteIndexes<UndertaleGameObject>("objects",     "objects",      Data.GameObjects,   "object",       "objects\\" + i.Name.Content,           gmx.Element("assets"));
-    WriteIndexes<UndertaleRoom>("rooms",       "rooms",        Data.Rooms,         "room",         "rooms\\" + i.Name.Content,             gmx.Element("assets"));
+    WriteIndexes<UndertaleSound>(gmx.Element("assets"), "sounds", "sound", Data.Sounds, "sound", "sound\\");
+    WriteIndexes<UndertaleSprite>(gmx.Element("assets"), "sprites", "sprites", Data.Sprites, "sprite", "sprites\\");
+    WriteIndexes<UndertaleBackground>(gmx.Element("assets"), "backgrounds", "background", Data.Backgrounds, "background", "background\\");
+    WriteIndexes<UndertaleScript>(gmx.Element("assets"), "scripts", "scripts", Data.Scripts, "script", "scripts\\", ".gml");
+    WriteIndexes<UndertaleFont>(gmx.Element("assets"), "fonts", "fonts", Data.Fonts, "font", "fonts\\");
+    WriteIndexes<UndertaleGameObject>(gmx.Element("assets"), "objects", "objects", Data.GameObjects, "object", "objects\\");
+    WriteIndexes<UndertaleRoom>(gmx.Element("assets"), "rooms", "rooms", Data.Rooms, "room", "rooms\\");
 
     File.WriteAllText(projFolder + "Export_Project.project.gmx", gmx.ToString());
 }
 
-void WriteIndexes<T>(string elementName, string attributeName, List<T> dataList, string oneName, string fileName, XElement rootNode)
+void WriteIndexes<T>(XElement rootNode, string elementName, string attributeName, IList<T> dataList, string oneName, string resourcePath, string fileExtension = "")
 {
-    var datasNode = new XElement(
-        new XAttribute(elementName, attributeName)
+    var datasNode = new XElement(elementName,
+        new XAttribute("name", attributeName)
     );
-    foreach (var i in dataList)
+    foreach (UndertaleNamedResource i in dataList)
     {
-        var dataNode = new XElement(oneName, fileName);
+        var dataNode = new XElement(oneName, resourcePath + i.Name.Content + fileExtension);
         datasNode.Add(dataNode);
     }
     rootNode.Add(datasNode);
