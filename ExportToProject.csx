@@ -28,7 +28,7 @@ Directory.CreateDirectory(projFolder);
 
 // --------------- Start exporting ---------------
 
-var resourceNum = 9;
+var resourceNum = 10;
 
 // Export sprites
 UpdateProgressBar(null, "Exporting sprites...", progress++, resourceNum);
@@ -61,6 +61,10 @@ await ExportFonts();
 // Export paths
 UpdateProgressBar(null, "Exporting paths...", progress++, resourceNum);
 await ExportPaths();
+
+// Export timelines
+UpdateProgressBar(null, "Exporting timelines...", progress++, resourceNum);
+await ExportTimelines();
 
 // Generate project file
 UpdateProgressBar(null, "Generating project file...", progress++, resourceNum);
@@ -537,6 +541,53 @@ void ExportPath(UndertalePath path)
     File.WriteAllText(projFolder + "/paths/" + path.Name.Content + ".path.gmx", gmx.ToString());
 }
 
+// --------------- Export Timelines ---------------
+async Task ExportTimelines()
+{
+    Directory.CreateDirectory(projFolder + "/timelines");
+    await Task.Run(() => Parallel.ForEach(Data.Timelines, ExportTimeline));
+}
+void ExportTimeline(UndertaleTimeline timeline)
+{
+    // Save the timeline GMX
+    var gmx = new XDocument(
+        new XComment(gmxDeclaration),
+        new XElement("timeline")
+    );
+    foreach (var i in timeline.Moments)
+    {
+        var entryNode = new XElement("entry");
+        entryNode.Add(new XElement("step", i.Item1));
+        foreach (var j in i.Item2)
+        {
+            entryNode.Add(
+                new XElement("libid", j.LibID.ToString()),
+                new XElement("id", j.ID.ToString()),
+                new XElement("kind", j.Kind.ToString()),
+                new XElement("userelative", j.LibID.ToString()),
+                new XElement("libid", BoolToString(j.UseRelative)),
+                new XElement("isquestion", BoolToString(j.IsQuestion)),
+                new XElement("useapplyto", BoolToString(j.UseApplyTo)),
+                new XElement("exetype", j.ExeType.ToString()),
+                new XElement("functionname", j.ActionName.Content),
+                new XElement("codestring", ""),
+                new XElement("whoName", "self"),
+                new XElement("relative", BoolToString(j.Relative)),
+                new XElement("isnot", BoolToString(j.IsNot)),
+                new XElement("arguments",
+                    new XElement("argument",
+                        new XElement("kind", "1"),
+                        new XElement("string", j.CodeId != null ? Decompiler.Decompile(j.CodeId, DECOMPILE_CONTEXT.Value) : "")
+                    )
+                )
+            );
+        }
+        gmx.Element("timeline").Add(entryNode);
+    }
+
+    File.WriteAllText(projFolder + "/timelines/" + timeline.Name.Content + ".timeline.gmx", gmx.ToString());
+}
+
 
 // --------------- Generate project file ---------------
 void ExportProjectFile()
@@ -554,6 +605,8 @@ void ExportProjectFile()
     WriteIndexes<UndertaleFont>(gmx.Element("assets"), "fonts", "fonts", Data.Fonts, "font", "fonts\\");
     WriteIndexes<UndertaleGameObject>(gmx.Element("assets"), "objects", "objects", Data.GameObjects, "object", "objects\\");
     WriteIndexes<UndertaleRoom>(gmx.Element("assets"), "rooms", "rooms", Data.Rooms, "room", "rooms\\");
+    WriteIndexes<UndertalePath>(gmx.Element("assets"), "paths", "paths", Data.Paths, "path", "paths\\");
+    WriteIndexes<UndertaleTimeline>(gmx.Element("assets"), "timelines", "timelines", Data.Timelines, "timeline", "timelines\\");
 
     File.WriteAllText(projFolder + "Export_Project.project.gmx", gmx.ToString());
 }
