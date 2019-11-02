@@ -153,73 +153,30 @@ async Task ExportBackground()
 void ExportBackground(UndertaleBackground background)
 {
     // Save the backgound GMX
-    var xmlWriter = XmlWriter.Create(projFolder + "/background/" + background.Name.Content + ".background.gmx");
-    xmlWriter.WriteStartDocument();
+    var gmx = new XDocument(
+        new XComment(gmxDeclaration),
+        new XElement("background", 
+            new XElement("istileset", "-1"),
+            new XElement("tilewidth", background.Texture.BoundingWidth.ToString()),
+            new XElement("tileheight", background.Texture.BoundingHeight.ToString()),
+            new XElement("tilexoff", "0"),
+            new XElement("tileyoff", "0"),
+            new XElement("tilehsep", "0"),
+            new XElement("tilevsep", "0"),
+            new XElement("HTile", "-1"),
+            new XElement("VTile", "-1"),
+            new XElement("TextureGroups", 
+                new XElement("TextureGroup0", "0")
+            ),
+            new XElement("For3D", "0"),
+            new XElement("width", background.Texture.BoundingWidth.ToString()),
+            new XElement("height", background.Texture.BoundingHeight.ToString()),
+            new XElement("data", "images\\" + background.Name.Content + ".png")
+        )
+    );
 
-    xmlWriter.WriteStartElement("background");
-
-    xmlWriter.WriteStartElement("istileset");
-    xmlWriter.WriteString("-1");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("tilewidth");
-    xmlWriter.WriteString(background.Texture.BoundingWidth.ToString());
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("tileheight");
-    xmlWriter.WriteString(background.Texture.BoundingHeight.ToString());
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("tilexoff");
-    xmlWriter.WriteString("0");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("tileyoff");
-    xmlWriter.WriteString("0");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("tilehsep");
-    xmlWriter.WriteString("0");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("tilevsep");
-    xmlWriter.WriteString("0");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("HTile");
-    xmlWriter.WriteString("-1");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("VTile");
-    xmlWriter.WriteString("-1");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("TextureGroups");
-    xmlWriter.WriteStartElement("TextureGroup0");
-    xmlWriter.WriteString("0");
-    xmlWriter.WriteEndElement();
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("For3D");
-    xmlWriter.WriteString("0");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("width");
-    xmlWriter.WriteString(background.Texture.BoundingWidth.ToString());
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("height");
-    xmlWriter.WriteString(background.Texture.BoundingHeight.ToString());
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("data");
-    xmlWriter.WriteString("images\\" + background.Name.Content + ".png");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteEndElement();
-    xmlWriter.WriteEndDocument();
-    xmlWriter.Close();
-
+    File.WriteAllText(projFolder + "/background/" + background.Name.Content + ".background.gmx", gmx.ToString());
+   
     // Save background images
     worker.ExportAsPNG(background.Texture, projFolder + "/background/images/" + background.Name.Content + ".png");
 }
@@ -232,41 +189,19 @@ async Task ExportGameObjects()
 void ExportGameObject(UndertaleGameObject gameObject)
 {
     // Save the object GMX
-    var xmlWriter = XmlWriter.Create(projFolder + "/objects/" + gameObject.Name.Content + ".object.gmx");
-    xmlWriter.WriteStartDocument();
-
-    xmlWriter.WriteStartElement("object");
-
-    xmlWriter.WriteStartElement("spriteName");
-    xmlWriter.WriteString(gameObject.Sprite is null ? "<undefined>" : gameObject.Sprite.Name.Content);
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("solid");
-    xmlWriter.WriteString(BoolToString(gameObject.Solid));
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("visible");
-    xmlWriter.WriteString(BoolToString(gameObject.Visible));
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("depth");
-    xmlWriter.WriteString(gameObject.Depth.ToString());
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("persistent");
-    xmlWriter.WriteString(BoolToString(gameObject.Persistent));
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("parentName");
-    xmlWriter.WriteString(gameObject.ParentId is null ? "<undefined>" : gameObject.ParentId.Name.Content);
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("maskName");
-    xmlWriter.WriteString(gameObject.TextureMaskId is null ? "<undefined>" : gameObject.TextureMaskId.Name.Content);
-    xmlWriter.WriteEndElement();
-
-    // Save events
-    xmlWriter.WriteStartElement("events");
+    var gmx = new XDocument(
+        new XComment(gmxDeclaration),
+        new XElement("object", 
+            new XElement("spriteName", gameObject.Sprite is null ? "<undefined>" : gameObject.Sprite.Name.Content),
+            new XElement("solid", BoolToString(gameObject.Solid)),
+            new XElement("visible", BoolToString(gameObject.Visible)),
+            new XElement("depth", gameObject.Depth.ToString()),
+            new XElement("persistent", BoolToString(gameObject.Persistent)),
+            new XElement("parentName", gameObject.ParentId is null ? "<undefined>" : gameObject.ParentId.Name.Content),
+            new XElement("maskName", gameObject.TextureMaskId is null ? "<undefined>" : gameObject.TextureMaskId.Name.Content),
+            new XElement("events")
+        )
+    );
 
     // Traversing the event type list
     for (int i = 0; i < gameObject.Events.Count; i++)
@@ -277,104 +212,60 @@ void ExportGameObject(UndertaleGameObject gameObject)
             // Traversing event list
             foreach (var j in gameObject.Events[i])
             {
-                xmlWriter.WriteStartElement("event");
+                var eventsNode = gmx.Element("object").Element("events");
 
-                xmlWriter.WriteAttributeString("eventtype", i.ToString());
+                var eventNode = new XElement("event",
+                        new XAttribute("eventtype", i.ToString())
+                );
 
                 if (j.EventSubtype == 4)
                 {
                     // To get the actual name of the collision object when the event type is a collision event
-                    xmlWriter.WriteAttributeString("ename", Data.GameObjects[(int)j.EventSubtype].Name.Content);
+                    eventNode.Add(new XAttribute("ename", Data.GameObjects[(int)j.EventSubtype].Name.Content));
                 }
                 else
                 {
                     // Get the sub-event number directly
-                    xmlWriter.WriteAttributeString("enumb", j.EventSubtype.ToString());
+                    eventNode.Add(new XAttribute("enumb", j.EventSubtype.ToString()));
                 }
 
                 // Save action
-                xmlWriter.WriteStartElement("action");
+                var actionNode = new XElement("action");
 
                 // Traversing the action list
                 foreach (var k in j.Actions)
                 {
-                    xmlWriter.WriteStartElement("libid");
-                    xmlWriter.WriteString(k.LibID.ToString());
-                    xmlWriter.WriteEndElement();
-
-                    xmlWriter.WriteStartElement("id");
-                    xmlWriter.WriteString(k.ID.ToString());
-                    xmlWriter.WriteEndElement();
-
-                    xmlWriter.WriteStartElement("kind");
-                    xmlWriter.WriteString(k.Kind.ToString());
-                    xmlWriter.WriteEndElement();
-
-                    xmlWriter.WriteStartElement("userelative");
-                    xmlWriter.WriteString(BoolToString(k.UseRelative));
-                    xmlWriter.WriteEndElement();
-
-                    xmlWriter.WriteStartElement("isquestion");
-                    xmlWriter.WriteString(BoolToString(k.IsQuestion));
-                    xmlWriter.WriteEndElement();
-
-                    xmlWriter.WriteStartElement("useapplyto");
-                    xmlWriter.WriteString(BoolToString(k.UseApplyTo));
-                    xmlWriter.WriteEndElement();
-
-                    xmlWriter.WriteStartElement("exetype");
-                    xmlWriter.WriteString(k.ExeType.ToString());
-                    xmlWriter.WriteEndElement();
-
-                    xmlWriter.WriteStartElement("functionname");
-                    xmlWriter.WriteString(k.ActionName.Content);
-                    xmlWriter.WriteEndElement();
-
-                    xmlWriter.WriteStartElement("codestring");
-                    xmlWriter.WriteString("");
-                    xmlWriter.WriteEndElement();
-
-                    xmlWriter.WriteStartElement("whoName");
-                    // All DND actions in data.win are converted to assembly code, automatically processing the performer
-                    xmlWriter.WriteString("self");
-                    xmlWriter.WriteEndElement();
-
-                    xmlWriter.WriteStartElement("relative");
-                    xmlWriter.WriteString(BoolToString(k.Relative));
-                    xmlWriter.WriteEndElement();
-
-                    xmlWriter.WriteStartElement("isnot");
-                    xmlWriter.WriteString(BoolToString(k.IsNot));
-                    xmlWriter.WriteEndElement();
-
-                    xmlWriter.WriteStartElement("arguments");
-                    xmlWriter.WriteStartElement("argument");
-
-                    xmlWriter.WriteStartElement("kind");
-                    xmlWriter.WriteString("1");
-                    xmlWriter.WriteEndElement();
-
-                    xmlWriter.WriteStartElement("string");
-                    xmlWriter.WriteString(k.CodeId != null ? Decompiler.Decompile(k.CodeId, DECOMPILE_CONTEXT.Value) : "");
-                    xmlWriter.WriteEndElement();
-
-                    xmlWriter.WriteEndElement();
-                    xmlWriter.WriteEndElement();
+                    actionNode.Add(
+                        new XElement("libid", k.LibID.ToString()),
+                        new XElement("id", k.ID.ToString()),
+                        new XElement("kind", k.Kind.ToString()),
+                        new XElement("userelative", k.LibID.ToString()),
+                        new XElement("libid", BoolToString(k.UseRelative)),
+                        new XElement("isquestion", BoolToString(k.IsQuestion)),
+                        new XElement("useapplyto", BoolToString(k.UseApplyTo)),
+                        new XElement("exetype", k.ExeType.ToString()),
+                        new XElement("functionname", k.ActionName.Content),
+                        new XElement("codestring", ""),
+                        new XElement("whoName", "self"),
+                        new XElement("relative", BoolToString(k.Relative)),
+                        new XElement("isnot", BoolToString(k.IsNot)),
+                        new XElement("arguments",
+                            new XElement("argument", 
+                                new XElement("kind", "1"),
+                                new XElement("string", k.CodeId != null ? Decompiler.Decompile(k.CodeId, DECOMPILE_CONTEXT.Value) : "") 
+                            )
+                        )
+                    );
                 }
+                eventNode.Add(actionNode);
+                eventsNode.Add(eventNode);
+
                 // TODO：Physics
-
-                xmlWriter.WriteEndElement();
-
-                xmlWriter.WriteEndElement();
             }
         }
     }
 
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteEndElement();
-    xmlWriter.WriteEndDocument();
-    xmlWriter.Close();
+    File.WriteAllText(projFolder + "/objects/" + gameObject.Name.Content + ".object.gmx", gmx.ToString());
 }
 
 // --------------- Export Room ---------------
@@ -386,170 +277,116 @@ async Task ExportRooms()
 void ExportRoom(UndertaleRoom room)
 {
     // Save the room GMX
-    var xmlWriter = XmlWriter.Create(projFolder + "/rooms/" + room.Name.Content + ".room.gmx");
-    xmlWriter.WriteStartDocument();
-
-    xmlWriter.WriteStartElement("room");
-
-    // Room settings
-    xmlWriter.WriteStartElement("caption");
-    xmlWriter.WriteString(room.Caption.Content);
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("width");
-    xmlWriter.WriteString(room.Width.ToString());
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("height");
-    xmlWriter.WriteString(room.Height.ToString());
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("vsnap");
-    xmlWriter.WriteString("32");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("hsnap");
-    xmlWriter.WriteString("32");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("isometric");
-    xmlWriter.WriteString("0");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("speed");
-    xmlWriter.WriteString(room.Speed.ToString());
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("persistent");
-    xmlWriter.WriteString(BoolToString(room.Persistent));
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("colour");
-    xmlWriter.WriteString(room.BackgroundColor.ToString());
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("showcolour");
-    xmlWriter.WriteString(BoolToString(room.DrawBackgroundColor));
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("code");
-    xmlWriter.WriteString(room.CreationCodeId is null ? "" : Decompiler.Decompile(room.CreationCodeId, context));
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("enableViews");
-    xmlWriter.WriteString(BoolToString(room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.EnableViews)));
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("clearViewBackground");
-    xmlWriter.WriteString(BoolToString(room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.ShowColor)));
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("clearDisplayBuffer");
-    xmlWriter.WriteString(BoolToString(room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.ClearDisplayBuffer)));
-    xmlWriter.WriteEndElement();
-
+    var gmx = new XDocument(
+        new XComment(gmxDeclaration),
+        new XElement("room", 
+            new XElement("caption", room.Caption.Content),
+            new XElement("width", room.Width.ToString()),
+            new XElement("height", room.Height.ToString()),
+            new XElement("vsnap", "32"),
+            new XElement("hsnap", "32"),
+            new XElement("isometric", "0"),
+            new XElement("speed", room.Speed.ToString()),
+            new XElement("persistent", BoolToString(room.Persistent)),
+            new XElement("colour", room.BackgroundColor.ToString()),
+            new XElement("code", room.CreationCodeId is null ? "" : Decompiler.Decompile(room.CreationCodeId, context)),
+            new XElement("enableViews", BoolToString(room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.EnableViews))),
+            new XElement("clearViewBackground", BoolToString(room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.ShowColor))),
+            new XElement("clearDisplayBuffer", BoolToString(room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.ClearDisplayBuffer)))
+        )
+    );
     // TODO：MakerSettings
 
     // Room backgrounds
-    xmlWriter.WriteStartElement("backgrounds");
+    var backgroundsNode = new XElement("backgrounds");
     foreach (var i in room.Backgrounds)
     {
-        xmlWriter.WriteStartElement("background");
-
-        xmlWriter.WriteAttributeString("visible", BoolToString(i.Enabled));
-        xmlWriter.WriteAttributeString("foreground", BoolToString(i.Foreground));
-        xmlWriter.WriteAttributeString("name", i.BackgroundDefinition is null ? "" : i.BackgroundDefinition.Name.Content);
-        xmlWriter.WriteAttributeString("x", i.X.ToString());
-        xmlWriter.WriteAttributeString("y", i.Y.ToString());
-        xmlWriter.WriteAttributeString("htiled", i.TileX.ToString());
-        xmlWriter.WriteAttributeString("vtiled", i.TileY.ToString());
-        xmlWriter.WriteAttributeString("hspeed", i.SpeedX.ToString());
-        xmlWriter.WriteAttributeString("vspeed", i.SpeedY.ToString());
-        // TODO：Stretch
-        xmlWriter.WriteAttributeString("stretch", "0");
-
-        xmlWriter.WriteEndElement();
+        var backgroundNode = new XElement("background",
+            new XAttribute("visible", BoolToString(i.Enabled)),
+            new XAttribute("foreground", BoolToString(i.Foreground)),
+            new XAttribute("name", i.BackgroundDefinition is null ? "" : i.BackgroundDefinition.Name.Content),
+            new XAttribute("x", i.X.ToString()),
+            new XAttribute("y", i.Y.ToString()),
+            new XAttribute("htiled", i.TileX.ToString()),
+            new XAttribute("vtiled", i.TileY.ToString()),
+            new XAttribute("hspeed", i.SpeedX.ToString()),
+            new XAttribute("vspeed", i.SpeedY.ToString()),
+            new XAttribute("stretch", "0")
+        );
+        backgroundsNode.Add(backgroundNode);
     }
-    xmlWriter.WriteEndElement();
+    gmx.Element("room").Add(backgroundsNode);
 
     // Room views
-    xmlWriter.WriteStartElement("views");
+    var viewsNode = new XElement("views");
     foreach (var i in room.Views)
     {
-        xmlWriter.WriteStartElement("view");
-
-        xmlWriter.WriteAttributeString("visible", BoolToString(i.Enabled));
-        xmlWriter.WriteAttributeString("objName", i.ObjectId is null ? "<undefined>" : i.ObjectId.Name.Content);
-        xmlWriter.WriteAttributeString("xview", i.ViewX.ToString());
-        xmlWriter.WriteAttributeString("yview", i.ViewY.ToString());
-        xmlWriter.WriteAttributeString("wview", i.ViewWidth.ToString());
-        xmlWriter.WriteAttributeString("hview", i.ViewHeight.ToString());
-        xmlWriter.WriteAttributeString("xport", i.PortX.ToString());
-        xmlWriter.WriteAttributeString("yport", i.PortY.ToString());
-        xmlWriter.WriteAttributeString("wport", i.PortWidth.ToString());
-        xmlWriter.WriteAttributeString("hport", i.PortHeight.ToString());
-        xmlWriter.WriteAttributeString("hborder", i.BorderX.ToString());
-        xmlWriter.WriteAttributeString("vborder", i.BorderY.ToString());
-        xmlWriter.WriteAttributeString("hspeed", i.SpeedX.ToString());
-        xmlWriter.WriteAttributeString("vspeed", i.SpeedY.ToString());
-
-        xmlWriter.WriteEndElement();
+        var viewNode = new XElement("view",
+            new XAttribute("visible", BoolToString(i.Enabled)),
+            new XAttribute("objName", i.ObjectId is null ? "<undefined>" : i.ObjectId.Name.Content),
+            new XAttribute("xview", i.ViewX.ToString()),
+            new XAttribute("yview", i.ViewY.ToString()),
+            new XAttribute("wview", i.ViewHeight.ToString()),
+            new XAttribute("xport", i.PortX.ToString()),
+            new XAttribute("yport", i.PortY.ToString()),
+            new XAttribute("wport", i.PortWidth.ToString()),
+            new XAttribute("hport", i.PortHeight.ToString()),
+            new XAttribute("hborder", i.BorderX.ToString()),
+            new XAttribute("vborder", i.BorderY.ToString()),
+            new XAttribute("hspeed", i.SpeedX.ToString()),
+            new XAttribute("vspeed", i.SpeedY.ToString())
+        );
+        viewsNode.Add(viewNode);
     }
-    xmlWriter.WriteEndElement();
+    gmx.Element("room").Add(viewsNode);
 
     // Room instances
-    xmlWriter.WriteStartElement("instances");
+    var instancesNode = new XElement("instances");
     foreach (var i in room.GameObjects)
     {
-        xmlWriter.WriteStartElement("instance");
-
-        xmlWriter.WriteAttributeString("objName", i.ObjectDefinition.Name.Content);
-        xmlWriter.WriteAttributeString("x", i.X.ToString());
-        xmlWriter.WriteAttributeString("y", i.Y.ToString());
-        xmlWriter.WriteAttributeString("name", "inst_" + i.InstanceID.ToString("X"));
-        // TODO：Locked
-        xmlWriter.WriteAttributeString("locked", "0");
-        xmlWriter.WriteAttributeString("code", i.CreationCode != null ? Decompiler.Decompile(i.CreationCode, DECOMPILE_CONTEXT.Value) : "");
-        xmlWriter.WriteAttributeString("scaleX", i.ScaleX.ToString());
-        xmlWriter.WriteAttributeString("scaleY", i.ScaleY.ToString());
-        xmlWriter.WriteAttributeString("colour", i.Color.ToString());
-        xmlWriter.WriteAttributeString("rotation", i.Rotation.ToString());
-
-        xmlWriter.WriteEndElement();
+        var instanceNode = new XElement("instance",
+            new XAttribute("objName", i.ObjectDefinition.Name.Content),
+            new XAttribute("x", i.X.ToString()),
+            new XAttribute("y", i.Y.ToString()),
+            new XAttribute("name", "inst_" + i.InstanceID.ToString("X")),
+            new XAttribute("locked", "0"),
+            new XAttribute("code", i.CreationCode != null ? Decompiler.Decompile(i.CreationCode, DECOMPILE_CONTEXT.Value) : ""),
+            new XAttribute("scaleX", i.ScaleX.ToString()),
+            new XAttribute("scaleY", i.ScaleY.ToString()),
+            new XAttribute("colour", i.Color.ToString()),
+            new XAttribute("rotation", i.Rotation.ToString())
+        );
+        instancesNode.Add(instanceNode);
     }
-    xmlWriter.WriteEndElement();
+    gmx.Element("room").Add(instancesNode);
 
     // Room tiles
-    xmlWriter.WriteStartElement("tiles");
+    var tilesNode = new XElement("tiles");
     foreach (var i in room.Tiles)
     {
-        xmlWriter.WriteStartElement("tile");
-
-        xmlWriter.WriteAttributeString("bgName", i.BackgroundDefinition.Name.Content);
-        xmlWriter.WriteAttributeString("x", i.X.ToString());
-        xmlWriter.WriteAttributeString("y", i.Y.ToString());
-        xmlWriter.WriteAttributeString("w", i.Width.ToString());
-        xmlWriter.WriteAttributeString("h", i.Height.ToString());
-        xmlWriter.WriteAttributeString("xo", i.SourceX.ToString());
-        xmlWriter.WriteAttributeString("yo", i.SourceY.ToString());
-        xmlWriter.WriteAttributeString("id", i.InstanceID.ToString());
-        xmlWriter.WriteAttributeString("name", "inst_" + i.InstanceID.ToString("X"));
-        xmlWriter.WriteAttributeString("depth", i.TileDepth.ToString());
-        // TODO：Locked
-        xmlWriter.WriteAttributeString("locked", "0");
-        xmlWriter.WriteAttributeString("colour", i.Color.ToString());
-        xmlWriter.WriteAttributeString("scaleX", i.ScaleX.ToString());
-        xmlWriter.WriteAttributeString("scaleY", i.ScaleY.ToString());
-
-        xmlWriter.WriteEndElement();
+        var tileNode = new XElement("tile",
+            new XAttribute("bgName", i.BackgroundDefinition.Name.Content),
+            new XAttribute("x", i.X.ToString()),
+            new XAttribute("y", i.Y.ToString()),
+            new XAttribute("w", i.Width.ToString()),
+            new XAttribute("h", i.Height.ToString()),
+            new XAttribute("xo", i.SourceX.ToString()),
+            new XAttribute("yo", i.SourceY.ToString()),
+            new XAttribute("id", i.InstanceID.ToString()),
+            new XAttribute("name", "inst_" + i.InstanceID.ToString("X")),
+            new XAttribute("depth", i.TileDepth.ToString()),
+            new XAttribute("locked", "0"),
+            new XAttribute("colour", i.Color.ToString()),
+            new XAttribute("scaleX", i.ScaleX.ToString()),
+            new XAttribute("scaleY", i.ScaleY.ToString())
+        );
+        tilesNode.Add(tileNode);
     }
-    xmlWriter.WriteEndElement();
+    gmx.Element("room").Add(tilesNode);
 
     // TODO：Room physics
 
-    xmlWriter.WriteEndElement();
-    xmlWriter.WriteEndDocument();
-    xmlWriter.Close();
+    File.WriteAllText(projFolder + "/rooms/" + room.Name.Content + ".room.gmx", gmx.ToString());
 }
 
 // --------------- Export Sound ---------------
@@ -561,95 +398,35 @@ async Task ExportSounds()
 void ExportSound(UndertaleSound sound)
 {
     // Save the sound GMX
-    var xmlWriter = XmlWriter.Create(projFolder + "/sound/" + sound.Name.Content + ".sound.gmx");
-    xmlWriter.WriteStartDocument();
+    var gmx = new XDocument(
+        new XComment(gmxDeclaration),
+        new XElement("sound", 
+            new XElement("kind", Path.GetExtension(sound.File.Content) == ".ogg" ? "3" : "0"),
+            new XElement("extension", Path.GetExtension(sound.File.Content)),
+            new XElement("origname", "sound\\audio\\" + sound.File.Content),
+            new XElement("effects", sound.Effects.ToString()),
+            new XElement("volume", sound.Volume.ToString()),
+            new XElement("pan", "0"),
+            new XElement("bitRates", "192"),
+            new XElement("sampleRates", 
+                new XElement("sampleRate", "44100")
+            ),
+            new XElement("types", 
+                new XElement("type", "1")
+            ),
+            new XElement("bitDepths", 
+                new XElement("bitDepth", "16")
+            ),
+            new XElement("preload", "-1"),
+            new XElement("data", Path.GetFileName(sound.File.Content)),
+            new XElement("compressed", Path.GetExtension(sound.File.Content) == ".ogg" ? "1" : "0"),
+            new XElement("streamed", Path.GetExtension(sound.File.Content) == ".ogg" ? "1" : "0"),
+            new XElement("uncompressOnLoad", "0"),
+            new XElement("audioGroup", "0")
+        )
+    );
 
-    xmlWriter.WriteStartElement("sound");
-
-    xmlWriter.WriteStartElement("kind");
-    // Inferred by file extension
-    xmlWriter.WriteString(Path.GetExtension(sound.File.Content) == ".ogg" ? "3" : "0");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("extension");
-    xmlWriter.WriteString(Path.GetExtension(sound.File.Content));
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("origname");
-    xmlWriter.WriteString("sound\\audio\\" + sound.File.Content);
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("effects");
-    xmlWriter.WriteString(sound.Effects.ToString());
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("volume");
-    xmlWriter.WriteString(sound.Volume.ToString());
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("pan");
-    // TODO：Pan
-    xmlWriter.WriteString("0");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("bitRates");
-    // TODO：BitRates
-    xmlWriter.WriteString("192");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("sampleRates");
-    // TODO：SampleRates
-    xmlWriter.WriteStartElement("sampleRate");
-    xmlWriter.WriteString("44100");
-    xmlWriter.WriteEndElement();
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("types");
-    // TODO：Types
-    xmlWriter.WriteStartElement("type");
-    xmlWriter.WriteString("1");
-    xmlWriter.WriteEndElement();
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("bitDepths");
-    // TODO：BitDepths
-    xmlWriter.WriteStartElement("bitDepth");
-    xmlWriter.WriteString("16");
-    xmlWriter.WriteEndElement();
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("preload");
-    // TODO：Preload
-    xmlWriter.WriteString("-1");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("data");
-    xmlWriter.WriteString(Path.GetFileName(sound.File.Content));
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("compressed");
-    // Inferred by file extension
-    xmlWriter.WriteString(Path.GetExtension(sound.File.Content) == ".ogg" ? "1" : "0");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("streamed");
-    // Inferred by file extension
-    xmlWriter.WriteString(Path.GetExtension(sound.File.Content) == ".ogg" ? "1" : "0");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("uncompressOnLoad");
-    // TODO：UncompressOnLoad
-    xmlWriter.WriteString("0");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("audioGroup");
-    // TODO：AudioGroup
-    xmlWriter.WriteString("0");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteEndElement();
-    xmlWriter.WriteEndDocument();
-    xmlWriter.Close();
+    File.WriteAllText(projFolder + "/sound/" + sound.Name.Content + ".sound.gmx", gmx.ToString());
 
     // Save sound files
     if (sound.AudioFile != null)
@@ -677,84 +454,45 @@ async Task ExportFonts()
 void ExportFont(UndertaleFont font)
 {
     // Save the font GMX
-    var xmlWriter = XmlWriter.Create(projFolder + "/fonts/" + font.Name.Content + ".font.gmx");
-    xmlWriter.WriteStartDocument();
+    var gmx = new XDocument(
+        new XComment(gmxDeclaration),
+        new XElement("font", 
+            new XElement("name", font.Name.Content),
+            new XElement("size", font.EmSize.ToString()),
+            new XElement("bold", BoolToString(font.Bold)),
+            new XElement("renderhq", "-1"),
+            new XElement("italic", BoolToString(font.Italic)),
+            new XElement("charset", font.Charset.ToString()),
+            new XElement("aa", font.AntiAliasing.ToString()),
+            new XElement("includeTTF", "0"),
+            new XElement("TTFName", ""),
+            new XElement("texgroups", 
+                new XElement("texgroup", "0")
+            ),
+            new XElement("ranges", 
+                new XElement("range0", font.RangeStart.ToString() + "," + font.RangeEnd.ToString())
+            ),
+            new XElement("glyphs"),
+            new XElement("kerningPairs"),
+            new XElement("image", font.Name.Content + ".png")
+        )
+    );
 
-    xmlWriter.WriteStartElement("font");
-
-    xmlWriter.WriteStartElement("name");
-    xmlWriter.WriteString(font.Name.Content);
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("size");
-    xmlWriter.WriteString(font.EmSize.ToString());
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("bold");
-    xmlWriter.WriteString(BoolToString(font.Bold));
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("renderhq");
-    xmlWriter.WriteString("-1");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("italic");
-    xmlWriter.WriteString(BoolToString(font.Italic));
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("charset");
-    xmlWriter.WriteString(font.Charset.ToString());
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("aa");
-    xmlWriter.WriteString(font.AntiAliasing.ToString());
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("includeTTF");
-    xmlWriter.WriteString("0");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("TTFName");
-    xmlWriter.WriteString("");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("texgroups");
-    xmlWriter.WriteStartElement("texgroup");
-    xmlWriter.WriteString("0");
-    xmlWriter.WriteEndElement();
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("ranges");
-    xmlWriter.WriteStartElement("range0");
-    xmlWriter.WriteString(font.RangeStart.ToString() + "," + font.RangeEnd.ToString());
-    xmlWriter.WriteEndElement();
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("glyphs");
+    File.WriteAllText(projFolder + "/fonts/" + font.Name.Content + ".font.gmx", gmx.ToString());
+    
+    var glyphsNode = gmx.Element("font").Element("glyphs");
     foreach (var i in font.Glyphs)
     {
-        xmlWriter.WriteStartElement("glyph");
-        xmlWriter.WriteAttributeString("character", i.Character.ToString());
-        xmlWriter.WriteAttributeString("x", i.SourceX.ToString());
-        xmlWriter.WriteAttributeString("y", i.SourceY.ToString());
-        xmlWriter.WriteAttributeString("w", i.SourceWidth.ToString());
-        xmlWriter.WriteAttributeString("h", i.SourceHeight.ToString());
-        xmlWriter.WriteAttributeString("shift", i.Shift.ToString());
-        xmlWriter.WriteAttributeString("offset", i.Offset.ToString());
-        xmlWriter.WriteEndElement();
+        var glyphNode = new XElement("glyph");
+        glyphNode.Add(new XElement("character", i.Character.ToString()));
+        glyphNode.Add(new XElement("x", i.SourceX.ToString()));
+        glyphNode.Add(new XElement("y", i.SourceY.ToString()));
+        glyphNode.Add(new XElement("w", i.SourceWidth.ToString()));
+        glyphNode.Add(new XElement("h", i.SourceHeight.ToString()));
+        glyphNode.Add(new XElement("shift", i.Shift.ToString()));
+        glyphNode.Add(new XElement("offset", i.Offset.ToString()));
+        glyphsNode.Add(glyphNode);
     }
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("kerningPairs");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("image");
-    xmlWriter.WriteString(font.Name.Content + ".png");
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteEndElement();
-    xmlWriter.WriteEndDocument();
-    xmlWriter.Close();
 
     // Save font textures
     worker.ExportAsPNG(font.Texture, projFolder + "/fonts/" + font.Name.Content + ".png");
