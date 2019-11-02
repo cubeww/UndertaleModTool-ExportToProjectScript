@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Drawing;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 using UndertaleModLib.Decompiler;
@@ -175,7 +176,17 @@ void ExportSprite(UndertaleSprite sprite)
     // Save sprite images
     for (int i = 0; i < sprite.Textures.Count; i++)
         if (sprite.Textures[i]?.Texture != null)
-            worker.ExportAsPNG(sprite.Textures[i].Texture, projFolder + "/sprites/images/" + sprite.Name.Content + "_" + i + ".png");
+        {
+            // Fix sprite size
+            var bitmapNew = new Bitmap((int)sprite.Width,(int)sprite.Height);
+            var bitmapOrigin = worker.GetTextureFor(sprite.Textures[i].Texture, Path.GetFileNameWithoutExtension(projFolder + "/sprites/images/" + sprite.Name.Content + "_" + i + ".png"));
+            //worker.ExportAsPNG(sprite.Textures[i].Texture, projFolder + "/sprites/images/" + sprite.Name.Content + "_" + i + ".png");
+            var g = Graphics.FromImage(bitmapNew);
+            g.DrawImage(bitmapOrigin, (int)sprite.Textures[i].Texture.TargetX, (int)sprite.Textures[i].Texture.TargetY);
+            bitmapNew.Save(projFolder + "/sprites/images/" + sprite.Name.Content + "_" + i + ".png");
+            bitmapNew.Dispose();
+            bitmapOrigin.Dispose();
+        }
 }
 
 // --------------- Export Background ---------------
