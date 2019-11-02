@@ -507,136 +507,15 @@ void ExportProjectFile()
         new XElement("assets")
     );
 
-    // Write sound indexes
-    var soundsNode = new XElement("sounds",
-        new XAttribute("name", "sound")
-    );
-    foreach (var i in Data.Sounds)
-    {
-        var soundNode = new XElement("sound", "sound\\" + i.Name.Content);
-        soundsNode.Add(soundNode);
-    }
-    gmx.Element("assets").Add(soundsNode);
-
-    // Write sprite indexes
-    var spritesNode = new XElement("sprites",
-        new XAttribute("name", "sprites")
-    );
-    foreach (var i in Data.Sprites)
-    {
-        var spriteNode = new XElement("sprite", "sprites\\" + i.Name.Content);
-        spritesNode.Add(spriteNode);
-    }
-    gmx.Element("assets").Add(spritesNode);
-
-    // Write background indexes
-    var backgroundsNode = new XElement("backgrounds",
-        new XAttribute("name", "background")
-    );
-    foreach (var i in Data.Backgrounds)
-    {
-        var backgroundNode = new XElement("background", "background\\" + i.Name.Content);
-        backgroundsNode.Add(backgroundNode);
-    }
-    gmx.Element("assets").Add(backgroundsNode);
-
-    // Write script indexes
-    var scriptsNode = new XElement("scripts",
-        new XAttribute("name", "scripts")
-    );
-    foreach (var i in Data.Scripts)
-    {
-        var scriptNode = new XElement("script", "scripts\\" + i.Name.Content + ".gml");
-        scriptsNode.Add(scriptNode);
-    }
-    gmx.Element("assets").Add(scriptsNode);
-
-    // Write font indexes
-    var scriptsNode = new XElement("scripts",
-        new XAttribute("name", "scripts")
-    );
-    foreach (var i in Data.Scripts)
-    {
-        var scriptNode = new XElement("script", "scripts\\" + i.Name.Content + ".gml");
-        scriptsNode.Add(scriptNode);
-    }
-    gmx.Element("assets").Add(scriptsNode);
+    WriteIndexes("sounds",      "sound",        Data.Sounds,        "sound",        "sound\\" + i.Name.Content,             gmx.Element("assets"));
+    WriteIndexes("sprites",     "sprites",      Data.Sprites,       "sprite",       "sprites\\" + i.Name.Content,           gmx.Element("assets"));
+    WriteIndexes("backgrounds", "background",   Data.Backgrounds,   "background",   "background\\" + i.Name.Content,        gmx.Element("assets"));
+    WriteIndexes("scripts",     "scripts",      Data.Scripts,       "script",       "scripts\\" + i.Name.Content + ".gml",  gmx.Element("assets"));
+    WriteIndexes("fonts",       "fonts",        Data.Fonts,         "font",         "fonts\\" + i.Name.Content,             gmx.Element("assets"));
+    WriteIndexes("objects",     "objects",      Data.GameObjects,   "object",       "objects\\" + i.Name.Content,           gmx.Element("assets"));
+    WriteIndexes("rooms",       "rooms",        Data.Rooms,         "room",         "rooms\\" + i.Name.Content,             gmx.Element("assets"));
 
     File.WriteAllText(projFolder + "Export_Project.project.gmx", gmx.ToString());
-///////////////////////////////////////////
-    xmlWriter.WriteStartElement("sounds");
-    xmlWriter.WriteAttributeString("name", "sound");
-    foreach (var i in Data.Sounds)
-    {
-        xmlWriter.WriteStartElement("sound");
-        xmlWriter.WriteString("sound\\" + i.Name.Content);
-        xmlWriter.WriteEndElement();
-    }
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("sprites");
-    xmlWriter.WriteAttributeString("name", "sprites");
-    foreach (var i in Data.Sprites)
-    {
-        xmlWriter.WriteStartElement("sprite");
-        xmlWriter.WriteString("sprites\\" + i.Name.Content);
-        xmlWriter.WriteEndElement();
-    }
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("backgrounds");
-    xmlWriter.WriteAttributeString("name", "background");
-    foreach (var i in Data.Backgrounds)
-    {
-        xmlWriter.WriteStartElement("background");
-        xmlWriter.WriteString("background\\" + i.Name.Content);
-        xmlWriter.WriteEndElement();
-    }
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("scripts");
-    xmlWriter.WriteAttributeString("name", "scripts");
-    foreach (var i in Data.Scripts)
-    {
-        xmlWriter.WriteStartElement("script");
-        xmlWriter.WriteString("scripts\\" + i.Name.Content + ".gml");
-        xmlWriter.WriteEndElement();
-    }
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("fonts");
-    xmlWriter.WriteAttributeString("name", "fonts");
-    foreach (var i in Data.Fonts)
-    {
-        xmlWriter.WriteStartElement("font");
-        xmlWriter.WriteString("fonts\\" + i.Name.Content);
-        xmlWriter.WriteEndElement();
-    }
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("objects");
-    xmlWriter.WriteAttributeString("name", "objects");
-    foreach (var i in Data.GameObjects)
-    {
-        xmlWriter.WriteStartElement("object");
-        xmlWriter.WriteString("objects\\" + i.Name.Content);
-        xmlWriter.WriteEndElement();
-    }
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteStartElement("rooms");
-    xmlWriter.WriteAttributeString("name", "rooms");
-    foreach (var i in Data.Rooms)
-    {
-        xmlWriter.WriteStartElement("room");
-        xmlWriter.WriteString("rooms\\" + i.Name.Content);
-        xmlWriter.WriteEndElement();
-    }
-    xmlWriter.WriteEndElement();
-
-    xmlWriter.WriteEndElement();
-    xmlWriter.WriteEndDocument();
-    xmlWriter.Close();
 }
 
 void WriteIndexes(string elementName, string attributeName, List dataList, string oneName, string fileName, XElement rootNode)
