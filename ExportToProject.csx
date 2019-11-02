@@ -507,18 +507,18 @@ void ExportProjectFile()
         new XElement("assets")
     );
 
-    WriteIndexes("sounds",      "sound",        Data.Sounds,        "sound",        "sound\\" + i.Name.Content,             gmx.Element("assets"));
-    WriteIndexes("sprites",     "sprites",      Data.Sprites,       "sprite",       "sprites\\" + i.Name.Content,           gmx.Element("assets"));
-    WriteIndexes("backgrounds", "background",   Data.Backgrounds,   "background",   "background\\" + i.Name.Content,        gmx.Element("assets"));
-    WriteIndexes("scripts",     "scripts",      Data.Scripts,       "script",       "scripts\\" + i.Name.Content + ".gml",  gmx.Element("assets"));
-    WriteIndexes("fonts",       "fonts",        Data.Fonts,         "font",         "fonts\\" + i.Name.Content,             gmx.Element("assets"));
-    WriteIndexes("objects",     "objects",      Data.GameObjects,   "object",       "objects\\" + i.Name.Content,           gmx.Element("assets"));
-    WriteIndexes("rooms",       "rooms",        Data.Rooms,         "room",         "rooms\\" + i.Name.Content,             gmx.Element("assets"));
+    WriteIndexes<UndertaleSound>("sounds",      "sound",        Data.Sounds,        "sound",        "sound\\" + i.Name.Content,             gmx.Element("assets"));
+    WriteIndexes<UndertaleSprite>("sprites",     "sprites",      Data.Sprites,       "sprite",       "sprites\\" + i.Name.Content,           gmx.Element("assets"));
+    WriteIndexes<UndertaleBackground>("backgrounds", "background",   Data.Backgrounds,   "background",   "background\\" + i.Name.Content,        gmx.Element("assets"));
+    WriteIndexes<UndertaleScript>("scripts",     "scripts",      Data.Scripts,       "script",       "scripts\\" + i.Name.Content + ".gml",  gmx.Element("assets"));
+    WriteIndexes<UndertaleFont>("fonts",       "fonts",        Data.Fonts,         "font",         "fonts\\" + i.Name.Content,             gmx.Element("assets"));
+    WriteIndexes<UndertaleGameObject>("objects",     "objects",      Data.GameObjects,   "object",       "objects\\" + i.Name.Content,           gmx.Element("assets"));
+    WriteIndexes<UndertaleRoom>("rooms",       "rooms",        Data.Rooms,         "room",         "rooms\\" + i.Name.Content,             gmx.Element("assets"));
 
     File.WriteAllText(projFolder + "Export_Project.project.gmx", gmx.ToString());
 }
 
-void WriteIndexes(string elementName, string attributeName, List dataList, string oneName, string fileName, XElement rootNode)
+void WriteIndexes<T>(string elementName, string attributeName, List<T> dataList, string oneName, string fileName, XElement rootNode)
 {
     var datasNode = new XElement(
         new XAttribute(elementName, attributeName)
