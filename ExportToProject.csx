@@ -93,7 +93,7 @@ void ExportSprite(UndertaleSprite sprite)
     xmlWriter.WriteString(sprite.OriginX.ToString());
     xmlWriter.WriteEndElement();
 
-    xmlWriter.WriteStartElement("yorig");
+    xmlWriter.WriteStartElement("yorigin");
     xmlWriter.WriteString(sprite.OriginY.ToString());
     xmlWriter.WriteEndElement();
 
@@ -181,13 +181,13 @@ void ExportSprite(UndertaleSprite sprite)
 // --------------- Export Background ---------------
 async Task ExportBackground()
 {
-    Directory.CreateDirectory(projFolder + "/backgrounds/images");
+    Directory.CreateDirectory(projFolder + "/background/images");
     await Task.Run(() => Parallel.ForEach(Data.Backgrounds, ExportBackground));
 }
 void ExportBackground(UndertaleBackground background)
 {
     // Save the backgound GMX
-    var xmlWriter = XmlWriter.Create(projFolder + "/backgrounds/" + background.Name.Content + ".background.gmx");
+    var xmlWriter = XmlWriter.Create(projFolder + "/background/" + background.Name.Content + ".background.gmx");
     xmlWriter.WriteStartDocument();
 
     xmlWriter.WriteStartElement("background");
@@ -255,7 +255,7 @@ void ExportBackground(UndertaleBackground background)
     xmlWriter.Close();
 
     // Save background images
-    worker.ExportAsPNG(background.Texture, projFolder + "/backgrounds/images/" + background.Name.Content + ".png");
+    worker.ExportAsPNG(background.Texture, projFolder + "/background/images/" + background.Name.Content + ".png");
 }
 // --------------- Export Object ---------------
 async Task ExportGameObjects()
@@ -828,7 +828,7 @@ void ExportProjectFile()
     foreach (var i in Data.Backgrounds)
     {
         xmlWriter.WriteStartElement("background");
-        xmlWriter.WriteString("backgrounds\\" + i.Name.Content);
+        xmlWriter.WriteString("background\\" + i.Name.Content);
         xmlWriter.WriteEndElement();
     }
     xmlWriter.WriteEndElement();
