@@ -503,13 +503,13 @@ void ExportFont(UndertaleFont font)
     foreach (var i in font.Glyphs)
     {
         var glyphNode = new XElement("glyph");
-        glyphNode.Add(new XElement("character", i.Character.ToString()));
-        glyphNode.Add(new XElement("x", i.SourceX.ToString()));
-        glyphNode.Add(new XElement("y", i.SourceY.ToString()));
-        glyphNode.Add(new XElement("w", i.SourceWidth.ToString()));
-        glyphNode.Add(new XElement("h", i.SourceHeight.ToString()));
-        glyphNode.Add(new XElement("shift", i.Shift.ToString()));
-        glyphNode.Add(new XElement("offset", i.Offset.ToString()));
+        glyphNode.Add(new XAttribute("character", i.Character.ToString()));
+        glyphNode.Add(new XAttribute("x", i.SourceX.ToString()));
+        glyphNode.Add(new XAttribute("y", i.SourceY.ToString()));
+        glyphNode.Add(new XAttribute("w", i.SourceWidth.ToString()));
+        glyphNode.Add(new XAttribute("h", i.SourceHeight.ToString()));
+        glyphNode.Add(new XAttribute("shift", i.Shift.ToString()));
+        glyphNode.Add(new XAttribute("offset", i.Offset.ToString()));
         glyphsNode.Add(glyphNode);
     }
 
