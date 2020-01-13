@@ -338,7 +338,7 @@ void ExportRoom(UndertaleRoom room)
     {
         var viewNode = new XElement("view",
             new XAttribute("visible", BoolToString(i.Enabled)),
-            new XAttribute("objName", i.ObjectId is null ? "<undefined>" : i.ObjectId.Name.Content),
+            new XAttribute("objName", i.ObjectId is null ? "" : i.ObjectId.Name.Content),
             new XAttribute("xview", i.ViewX.ToString()),
             new XAttribute("yview", i.ViewY.ToString()),
             new XAttribute("wview", i.ViewHeight.ToString()),
