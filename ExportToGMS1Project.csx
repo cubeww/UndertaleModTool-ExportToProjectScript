@@ -142,15 +142,7 @@ void ExportSprite(UndertaleSprite sprite)
     {
         if (sprite.Textures[i]?.Texture != null)
         {
-            // Fix sprite size
-            var bitmapNew = new Bitmap((int)sprite.Width, (int)sprite.Height);
-            var bitmapOrigin = worker.GetTextureFor(sprite.Textures[i].Texture, Path.GetFileNameWithoutExtension(projFolder + "/sprites/images/" + sprite.Name.Content + "_" + i + ".png"));
-            //worker.ExportAsPNG(sprite.Textures[i].Texture, projFolder + "/sprites/images/" + sprite.Name.Content + "_" + i + ".png");
-            var g = Graphics.FromImage(bitmapNew);
-            g.DrawImage(bitmapOrigin, (int)sprite.Textures[i].Texture.TargetX, (int)sprite.Textures[i].Texture.TargetY);
-            bitmapNew.Save(projFolder + "/sprites/images/" + sprite.Name.Content + "_" + i + ".png");
-            bitmapNew.Dispose();
-            bitmapOrigin.Dispose();
+            worker.ExportAsPNG(sprite.Textures[i].Texture, projFolder + "/sprites/images/" + sprite.Name.Content + "_" + i + ".png", null, true);
         }
     }
 }
