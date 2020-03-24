@@ -162,8 +162,8 @@ void ExportBackground(UndertaleBackground background)
         new XComment(gmxDeclaration),
         new XElement("background",
             new XElement("istileset", "-1"),
-            new XElement("tilewidth", background.Texture.BoundingWidth.ToString()),
-            new XElement("tileheight", background.Texture.BoundingHeight.ToString()),
+            new XElement("tilewidth", background.Texture == null ? "0" : background.Texture.BoundingWidth.ToString()),
+            new XElement("tileheight", background.Texture == null ? "0" : background.Texture.BoundingHeight.ToString()),
             new XElement("tilexoff", "0"),
             new XElement("tileyoff", "0"),
             new XElement("tilehsep", "0"),
@@ -174,8 +174,8 @@ void ExportBackground(UndertaleBackground background)
                 new XElement("TextureGroup0", "0")
             ),
             new XElement("For3D", "0"),
-            new XElement("width", background.Texture.BoundingWidth.ToString()),
-            new XElement("height", background.Texture.BoundingHeight.ToString()),
+            new XElement("width", background.Texture == null ? "0" : background.Texture.BoundingWidth.ToString()),
+            new XElement("height",background.Texture == null ? "0" :  background.Texture.BoundingHeight.ToString()),
             new XElement("data", "images\\" + background.Name.Content + ".png")
         )
     );
@@ -183,7 +183,8 @@ void ExportBackground(UndertaleBackground background)
     File.WriteAllText(projFolder + "/background/" + background.Name.Content + ".background.gmx", gmx.ToString());
 
     // Save background images
-    worker.ExportAsPNG(background.Texture, projFolder + "/background/images/" + background.Name.Content + ".png");
+    if (background.Texture != null)
+        worker.ExportAsPNG(background.Texture, projFolder + "/background/images/" + background.Name.Content + ".png");
 }
 // --------------- Export Object ---------------
 async Task ExportGameObjects()
