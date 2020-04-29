@@ -378,6 +378,7 @@ void ExportRoom(UndertaleRoom room)
             new XAttribute("xview", i.ViewX.ToString()),
             new XAttribute("yview", i.ViewY.ToString()),
             new XAttribute("wview", i.ViewHeight.ToString()),
+			new XAttribute("hview", i.ViewHeight.ToString()),
             new XAttribute("xport", i.PortX.ToString()),
             new XAttribute("yport", i.PortY.ToString()),
             new XAttribute("wport", i.PortWidth.ToString()),
