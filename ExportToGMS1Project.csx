@@ -136,7 +136,7 @@ void ExportSprite(UndertaleSprite sprite)
         }
     }
 
-    File.WriteAllText(projFolder + "/sprites/" + sprite.Name.Content + ".sprite.gmx", gmx.ToString());
+    File.WriteAllText(projFolder + "/sprites/" + sprite.Name.Content + ".sprite.gmx", gmx.ToString() + eol);
 
     // Save sprite images
     for (int i = 0; i < sprite.Textures.Count; i++)
@@ -181,7 +181,7 @@ void ExportBackground(UndertaleBackground background)
         )
     );
 
-    File.WriteAllText(projFolder + "/background/" + background.Name.Content + ".background.gmx", gmx.ToString());
+    File.WriteAllText(projFolder + "/background/" + background.Name.Content + ".background.gmx", gmx.ToString() + eol);
 
     // Save background images
     if (background.Texture != null)
@@ -298,7 +298,7 @@ void ExportGameObject(UndertaleGameObject gameObject)
         }
     }
 
-    File.WriteAllText(projFolder + "/objects/" + gameObject.Name.Content + ".object.gmx", gmx.ToString() + "\n");
+    File.WriteAllText(projFolder + "/objects/" + gameObject.Name.Content + ".object.gmx", gmx.ToString() + eol);
 }
 
 // --------------- Export Room ---------------
@@ -447,7 +447,7 @@ void ExportRoom(UndertaleRoom room)
 		new XElement("PhysicsWorldPixToMeters", room.MetersPerPixel)
 	);
 
-    File.WriteAllText(projFolder + "/rooms/" + room.Name.Content + ".room.gmx", gmx.ToString() + "\n");
+    File.WriteAllText(projFolder + "/rooms/" + room.Name.Content + ".room.gmx", gmx.ToString() + eol);
 }
 
 // --------------- Export Sound ---------------
@@ -493,7 +493,7 @@ void ExportSound(UndertaleSound sound)
         )
     );
 
-    File.WriteAllText(projFolder + "/sound/" + sound.Name.Content + ".sound.gmx", gmx.ToString() + "\n");
+    File.WriteAllText(projFolder + "/sound/" + sound.Name.Content + ".sound.gmx", gmx.ToString() + eol);
 
     // Save sound files
     if (sound.AudioFile != null)
@@ -563,7 +563,7 @@ void ExportFont(UndertaleFont font)
         glyphsNode.Add(glyphNode);
     }
 
-    File.WriteAllText(projFolder + "/fonts/" + font.Name.Content + ".font.gmx", gmx.ToString());
+    File.WriteAllText(projFolder + "/fonts/" + font.Name.Content + ".font.gmx", gmx.ToString() + eol);
 
     // Save font textures
     worker.ExportAsPNG(font.Texture, projFolder + "/fonts/" + font.Name.Content + ".png");
@@ -600,7 +600,7 @@ void ExportPath(UndertalePath path)
         );
     }
 
-    File.WriteAllText(projFolder + "/paths/" + path.Name.Content + ".path.gmx", gmx.ToString());
+    File.WriteAllText(projFolder + "/paths/" + path.Name.Content + ".path.gmx", gmx.ToString() + eol);
 }
 
 // --------------- Export Timelines ---------------
@@ -651,7 +651,7 @@ void ExportTimeline(UndertaleTimeline timeline)
         gmx.Element("timeline").Add(entryNode);
     }
 
-    File.WriteAllText(projFolder + "/timelines/" + timeline.Name.Content + ".timeline.gmx", gmx.ToString());
+    File.WriteAllText(projFolder + "/timelines/" + timeline.Name.Content + ".timeline.gmx", gmx.ToString() + eol);
 }
 
 
@@ -676,7 +676,7 @@ void GenerateProjectFile()
     WriteIndexes<UndertalePath>(gmx.Element("assets"), "paths", "paths", Data.Paths, "path", "paths\\");
     WriteIndexes<UndertaleTimeline>(gmx.Element("assets"), "timelines", "timelines", Data.Timelines, "timeline", "timelines\\");
 
-    File.WriteAllText(projFolder + GameName + ".project.gmx", gmx.ToString());
+    File.WriteAllText(projFolder + GameName + ".project.gmx", gmx.ToString() + eol);
 }
 
 void WriteIndexes<T>(XElement rootNode, string elementName, string attributeName, IList<T> dataList, string oneName, string resourcePath, string fileExtension = "")
