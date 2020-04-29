@@ -324,6 +324,7 @@ void ExportRoom(UndertaleRoom room)
             new XElement("speed", room.Speed.ToString()),
             new XElement("persistent", BoolToString(room.Persistent)),
             new XElement("colour", room.BackgroundColor.ToString()),
+			new XElement("showcolour", BoolToString(room.DrawBackgroundColor)),
             new XElement("code", room.CreationCodeId != null ? Decompiler.Decompile(room.CreationCodeId, DECOMPILE_CONTEXT.Value) : ""),
             new XElement("enableViews", BoolToString(room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.EnableViews))),
             new XElement("clearViewBackground", BoolToString(room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.ShowColor))),
