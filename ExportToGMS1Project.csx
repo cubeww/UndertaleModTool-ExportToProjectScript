@@ -116,8 +116,7 @@ void ExportSprite(UndertaleSprite sprite)
             new XElement("For3D", "0"),
             new XElement("width", sprite.Width.ToString()),
             new XElement("height", sprite.Height.ToString()),
-            new XElement("frames"),
-            new XElement("bbox_right", sprite.MarginRight.ToString())
+            new XElement("frames")
         )
     );
 
