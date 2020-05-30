@@ -101,7 +101,7 @@ void ExportSprite(UndertaleSprite sprite)
             new XElement("type", "0"),
             new XElement("xorig", sprite.OriginX.ToString()),
             new XElement("yorigin", sprite.OriginY.ToString()),
-            new XElement("colkind", sprite.BBoxMode.ToString()),
+            new XElement("colkind", (int)sprite.SepMasks == 0 ? 1 : 0), // if sepmasks is AxisAlignedRect (0), use Rectangle (1), otherwise default to Precise (0)			
             new XElement("coltolerance", "0"),
             new XElement("sepmasks", sprite.SepMasks.ToString("D")),
             new XElement("bboxmode", sprite.BBoxMode.ToString()),
