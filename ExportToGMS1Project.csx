@@ -622,9 +622,9 @@ void ExportTimeline(UndertaleTimeline timeline)
     foreach (var i in timeline.Moments)
     {
         var entryNode = new XElement("entry");
-        entryNode.Add(new XElement("step", i.Item1));
+        entryNode.Add(new XElement("step", i.Step));
         entryNode.Add(new XElement("event"));
-        foreach (var j in i.Item2)
+        foreach (var j in i.Event)
         {
             entryNode.Element("event").Add(
                 new XElement("action",
